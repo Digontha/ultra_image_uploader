@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "target": "ESNext",
+    "lib": ["DOM", "ESNext", "DOM.Iterable"],
+    "declaration": true,
+    "declarationDir": "./dist",
+    "jsx": "react-jsx",
+    "strict": true,
+    "resolveJsonModule": true
+  }
+}
