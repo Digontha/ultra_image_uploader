@@ -1,3 +1,4 @@
 import { ImageUploader } from "./ProImageUploader";
+import { imageUrl } from "./helper/ImageBB/ImageBBUrl";
 
-export default ImageUploader;
+export  {ImageUploader,imageUrl};

@@ -4,8 +4,8 @@ export interface ImageUploaderProps {
   mode: "add" | "update";
   defaultImages?: string[];
   multiple?: boolean;
-  maxFileSize?: number; // in bytes
-  allowedFileTypes?: string[]; // e.g., ["image/jpeg", "image/png"]
+  maxFileSize?: number; 
+  allowedFileTypes?: string[]; 
   containerClassName?: string;
   uploadBoxClassName?: string;
   imageClassName?: string;
@@ -19,4 +19,9 @@ export interface ImageUploaderProps {
   onUpload?: (files: File[]) => void;
   onRemove?: (file: File, index: number) => void;
   onFileValidationError?: (error: string) => void;
+}
+
+export interface ImageBBUrl{
+  images: File[];
+  apiKey:string;
 }
