@@ -1,3 +1,3 @@
 import { ImageUploader } from "./ProImageUploader";
-import { imageUrl } from "./helper/ImageBB/ImageBBUrl";
-export { ImageUploader, imageUrl };
+import { uploadImagesToImageBB } from "./helper/ImageBB/ImageBBUrl";
+export { ImageUploader, uploadImagesToImageBB };

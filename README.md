@@ -16,11 +16,11 @@ A modern React component for handling image uploads with drag-and-drop functiona
 ## Installation
 
 ```bash
-npm install ultra_image_uploader
+npm install ultra-image-uploader
 # or
-yarn add ultra_image_uploader
+yarn add ultra-image-uploader
 # or
-pnpm add ultra_image_uploader
+pnpm add ultra-image-uploader
 ```
 
 ## Quick Start
@@ -28,8 +28,8 @@ pnpm add ultra_image_uploader
 ### Basic Usage
 
 ```tsx
-import { ImageUploader, imageUrl } from 'ultra_image_uploader';
-import { useState } from 'react';
+import { ImageUploader, imageUrl } from "ultra-image-uploader";
+import { useState } from "react";
 
 function App() {
   const [images, setImages] = useState<File[]>([]);
@@ -48,18 +48,18 @@ function App() {
 ### With ImgBB Integration
 
 ```tsx
-import { ImageUploader, imageUrl } from 'ultra_image_uploader';
-import { useState } from 'react';
+import { ImageUploader, imageUrl } from "ultra-image-uploader";
+import { useState } from "react";
 
 function ImageUploadForm() {
   const [images, setImages] = useState<File[]>([]);
 
   const handleSubmit = async () => {
     try {
-      const uploadedUrls = await imageUrl(images, 'YOUR_IMGBB_API_KEY');
-      console.log('Uploaded image URLs:', uploadedUrls);
+      const uploadedUrls = await imageUrl(images, "YOUR_IMGBB_API_KEY");
+      console.log("Uploaded image URLs:", uploadedUrls);
     } catch (error) {
-      console.error('Upload failed:', error);
+      console.error("Upload failed:", error);
     }
   };
 
@@ -79,41 +79,41 @@ function ImageUploadForm() {
 
 ## Component Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `images` | `File[]` | Required | Array of selected image files |
-| `setImages` | `(images: File[]) => void` | Required | Function to update images array |
-| `mode` | `"add" \| "update"` | Required | Mode of operation |
-| `defaultImages` | `string[]` | `[]` | Array of existing image URLs |
-| `multiple` | `boolean` | `false` | Allow multiple file selection |
-| `maxFileSize` | `number` | `5242880` | Maximum file size in bytes (5MB) |
-| `allowedFileTypes` | `string[]` | `["image/jpeg", "image/png"]` | Allowed MIME types |
-| `containerClassName` | `string` | `""` | Custom container class |
-| `uploadBoxClassName` | `string` | `""` | Custom upload box class |
-| `imageClassName` | `string` | `""` | Custom image preview class |
-| `uploadBoxStyle` | `React.CSSProperties` | `{}` | Custom upload box styles |
-| `imageStyle` | `React.CSSProperties` | `{}` | Custom image preview styles |
-| `uploadIcon` | `React.ReactNode` | `<UploadCloudIcon />` | Custom upload icon |
-| `deleteIcon` | `React.ReactNode` | `<TrashIcon />` | Custom delete icon |
-| `uploadText` | `string` | `"Choose files to upload"` | Upload box text |
-| `dragAndDropText` | `string` | `"Drag and drop files here"` | Drag and drop text |
-| `fileTypeText` | `string` | `"PNG, JPG, or JPEG files"` | File type info text |
-| `onUpload` | `(files: File[]) => void` | - | Upload callback |
-| `onRemove` | `(file: File, index: number) => void` | - | Remove callback |
-| `onFileValidationError` | `(error: string) => void` | - | Validation error callback |
+| Prop                    | Type                                  | Default                       | Description                      |
+| ----------------------- | ------------------------------------- | ----------------------------- | -------------------------------- |
+| `images`                | `File[]`                              | Required                      | Array of selected image files    |
+| `setImages`             | `(images: File[]) => void`            | Required                      | Function to update images array  |
+| `mode`                  | `"add" \| "update"`                   | Required                      | Mode of operation                |
+| `defaultImages`         | `string[]`                            | `[]`                          | Array of existing image URLs     |
+| `multiple`              | `boolean`                             | `false`                       | Allow multiple file selection    |
+| `maxFileSize`           | `number`                              | `5242880`                     | Maximum file size in bytes (5MB) |
+| `allowedFileTypes`      | `string[]`                            | `["image/jpeg", "image/png"]` | Allowed MIME types               |
+| `containerClassName`    | `string`                              | `""`                          | Custom container class           |
+| `uploadBoxClassName`    | `string`                              | `""`                          | Custom upload box class          |
+| `imageClassName`        | `string`                              | `""`                          | Custom image preview class       |
+| `uploadBoxStyle`        | `React.CSSProperties`                 | `{}`                          | Custom upload box styles         |
+| `imageStyle`            | `React.CSSProperties`                 | `{}`                          | Custom image preview styles      |
+| `uploadIcon`            | `React.ReactNode`                     | `<UploadCloudIcon />`         | Custom upload icon               |
+| `deleteIcon`            | `React.ReactNode`                     | `<TrashIcon />`               | Custom delete icon               |
+| `uploadText`            | `string`                              | `"Choose files to upload"`    | Upload box text                  |
+| `dragAndDropText`       | `string`                              | `"Drag and drop files here"`  | Drag and drop text               |
+| `fileTypeText`          | `string`                              | `"PNG, JPG, or JPEG files"`   | File type info text              |
+| `onUpload`              | `(files: File[]) => void`             | -                             | Upload callback                  |
+| `onRemove`              | `(file: File, index: number) => void` | -                             | Remove callback                  |
+| `onFileValidationError` | `(error: string) => void`             | -                             | Validation error callback        |
 
 ## Usage Examples
 
 ### Add Mode (New Upload)
 
 ```tsx
-import { ImageUploader, imageUrl } from 'ultra_image_uploader';
+import { ImageUploader, imageUrl } from "ultra-image-uploader";
 
 function AddImage() {
   const [images, setImages] = useState<File[]>([]);
 
   const handleSubmit = async () => {
-    const imgUrls = await imageUrl(images, 'YOUR_IMGBB_API_KEY');
+    const imgUrls = await imageUrl(images, "YOUR_IMGBB_API_KEY");
     // Handle the uploaded image URLs
   };
 
@@ -138,10 +138,10 @@ function AddImage() {
 ```tsx
 function UpdateImage() {
   const [images, setImages] = useState<File[]>([]);
-  const existingImages = ['https://example.com/image1.jpg'];
+  const existingImages = ["https://example.com/image1.jpg"];
 
   const handleSubmit = async () => {
-    const newImgUrls = await imageUrl(images, 'YOUR_IMGBB_API_KEY');
+    const newImgUrls = await imageUrl(images, "YOUR_IMGBB_API_KEY");
     // Combine existing and new images
   };
 
@@ -184,10 +184,10 @@ The package includes a utility function `imageUrl` for uploading images to ImgBB
 ```typescript
 const uploadImages = async (files: File[]) => {
   try {
-    const urls = await imageUrl(files, 'YOUR_IMGBB_API_KEY');
-    console.log('Uploaded URLs:', urls);
+    const urls = await imageUrl(files, "YOUR_IMGBB_API_KEY");
+    console.log("Uploaded URLs:", urls);
   } catch (error) {
-    console.error('Upload failed:', error);
+    console.error("Upload failed:", error);
   }
 };
 ```

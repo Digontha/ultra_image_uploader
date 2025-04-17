@@ -1,6 +1,24 @@
-const uploadImageToImageBB = async (imageFile: File, apiKey: string): Promise<string | null> => {
+export interface ImageBBResponse {
+  success: boolean;
+  data: {
+    url: string;
+    // You can add other fields from the response if needed
+  };
+  // Add other fields from the response if needed
+}
+
+export interface ImageBBUrlResult {
+  urls: string[];
+  apiKey: string;
+}
+
+const uploadImageToImageBB = async (
+  imageFile: File, 
+  apiKey: string
+): Promise<string | null> => {
   const formData = new FormData();
   formData.append("image", imageFile);
+  
   try {
     const response = await fetch(
       `https://api.imgbb.com/1/upload?key=${apiKey}`,
@@ -9,7 +27,9 @@ const uploadImageToImageBB = async (imageFile: File, apiKey: string): Promise<st
         body: formData,
       }
     );
-    const data = await response.json();
+    
+    const data: ImageBBResponse = await response.json();
+    
     if (data.success) {
       return data.data.url;
     } else {
@@ -22,14 +42,20 @@ const uploadImageToImageBB = async (imageFile: File, apiKey: string): Promise<st
   }
 };
 
-export const imageUrl = async (images: File[], apiKey: string): Promise<string[]> => {
-  const imageURLs = (await Promise.all(images.map((image) => uploadImageToImageBB(image, apiKey))))
-    .filter((url): url is string => url !== null);
+export const uploadImagesToImageBB = async (
+  images: File[],
+  apiKey: string
+): Promise<ImageBBUrlResult> => {
+  const imageURLs = (
+    await Promise.all(images.map((image) => uploadImageToImageBB(image, apiKey)))
+  ).filter((url): url is string => url !== null);
   
   if (imageURLs.length === 0) {
-    alert("Failed to upload images.");
-    return []; 
+    throw new Error("Failed to upload images");
   }
   
-  return imageURLs;
+  return {
+    urls: imageURLs,
+    apiKey: apiKey
+  };
 };

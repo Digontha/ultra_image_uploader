@@ -1,4 +1,4 @@
-interface ImageUploaderProps {
+export interface ImageUploaderProps {
     images: File[];
     setImages: (images: File[]) => void;
     mode: "add" | "update";
@@ -22,4 +22,3 @@ interface ImageUploaderProps {
 }
 export declare function ImageUploader({ images, setImages, mode, defaultImages, multiple, maxFileSize, // 5MB
 allowedFileTypes, containerClassName, uploadBoxClassName, imageClassName, uploadBoxStyle, imageStyle, uploadIcon, deleteIcon, uploadText, dragAndDropText, fileTypeText, onUpload, onRemove, onFileValidationError, }: ImageUploaderProps): import("react/jsx-runtime").JSX.Element;
-export {};

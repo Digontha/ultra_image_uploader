@@ -20,12 +20,13 @@ const uploadImageToImageBB = async (imageFile, apiKey) => {
         return null;
     }
 };
-export const imageUrl = async (images, apiKey) => {
-    const imageURLs = (await Promise.all(images.map((image) => uploadImageToImageBB(image, apiKey))))
-        .filter((url) => url !== null);
+export const uploadImagesToImageBB = async (images, apiKey) => {
+    const imageURLs = (await Promise.all(images.map((image) => uploadImageToImageBB(image, apiKey)))).filter((url) => url !== null);
     if (imageURLs.length === 0) {
-        alert("Failed to upload images.");
-        return [];
+        throw new Error("Failed to upload images");
     }
-    return imageURLs;
+    return {
+        urls: imageURLs,
+        apiKey: apiKey
+    };
 };

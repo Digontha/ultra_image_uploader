@@ -21,7 +21,7 @@ export interface ImageUploaderProps {
   onFileValidationError?: (error: string) => void;
 }
 
-export interface ImageBBUrl{
-  images: File[];
-  apiKey:string;
+export interface ImageBBUrlResult {
+  urls: string[];
+  apiKey: string;
 }

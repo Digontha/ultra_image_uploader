@@ -2,7 +2,7 @@
 import { TrashIcon, UploadCloudIcon } from "lucide-react";
 import { useState, useCallback } from "react";
 
-interface ImageUploaderProps {
+export interface ImageUploaderProps {
   images: File[];
   setImages: (images: File[]) => void;
   mode: "add" | "update";
@@ -48,7 +48,7 @@ export function ImageUploader({
   onUpload,
   onRemove,
   onFileValidationError,
-}: ImageUploaderProps) {
+}: ImageUploaderProps) { 
   const [removedDefaultImages, setRemovedDefaultImages] = useState<number[]>(
     []
   );
