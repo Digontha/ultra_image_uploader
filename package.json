@@ -9,7 +9,6 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@hookform/resolvers": "^4.1.3",
     "@types/node": "^22.13.14",
     "lucide-react": "^0.485.0",
     "react": "^19.1.0",
