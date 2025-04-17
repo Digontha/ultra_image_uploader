@@ -1,6 +1,6 @@
 {
   "name": "ultra-image-upload",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "React component for image uploads with drag-and-drop and ImgBB integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
