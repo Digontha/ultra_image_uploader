@@ -2,7 +2,7 @@
 import { TrashIcon, UploadCloudIcon } from "lucide-react";
 import { useState, useCallback } from "react";
 
-export interface ImageUploaderProps {
+interface ImageUploaderProps {
   images: File[];
   setImages: (images: File[]) => void;
   mode: "add" | "update";
@@ -38,20 +38,21 @@ export function ImageUploader({
   imageClassName = "",
   uploadBoxStyle = {},
   imageStyle = {},
-  uploadIcon = <UploadCloudIcon className="text-3xl text-gray-900 mb-1" />,
+  uploadIcon = <UploadCloudIcon className="w-12 h-12 text-blue-500 mb-2" />,
   deleteIcon = (
-    <TrashIcon className="absolute -top-[10px] -right-[10px] rounded-full bg-red-500 text-2xl text-white cursor-pointer p-1" />
+    <div className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full shadow-lg transform transition-transform hover:scale-110">
+      <TrashIcon className="w-4 h-4 text-white" />
+    </div>
   ),
   uploadText = "Choose files to upload",
-  dragAndDropText = "Drag and drop files here",
-  fileTypeText = "PNG, JPG, or JPEG files",
+  dragAndDropText = "or drag and drop files here",
+  fileTypeText = "PNG, JPG, or JPEG files up to 5MB",
   onUpload,
   onRemove,
   onFileValidationError,
-}: ImageUploaderProps) { 
-  const [removedDefaultImages, setRemovedDefaultImages] = useState<number[]>(
-    []
-  );
+}: ImageUploaderProps) {
+  const [removedDefaultImages, setRemovedDefaultImages] = useState<number[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -82,6 +83,7 @@ export function ImageUploader({
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
+      setIsDragging(false);
       const files = Array.from(e.dataTransfer.files);
 
       const validFiles = files.filter((file) => {
@@ -117,6 +119,12 @@ export function ImageUploader({
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
   }, []);
 
   const removeImage = (index: number) => {
@@ -130,43 +138,54 @@ export function ImageUploader({
   };
 
   return (
-    <div className={containerClassName}>
+    <div className={`space-y-4 ${containerClassName}`}>
       <div
-        className="flex flex-wrap gap-4"
+        className={`
+          relative rounded-lg transition-all duration-200
+          ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50'}
+          ${uploadBoxClassName || 'border-2 border-dashed p-8'}
+        `}
+        style={uploadBoxStyle}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
       >
-        <div
-          className={`h-40 w-full bg-gray-100 border-2 border-gray-300 cursor-pointer flex justify-center items-center text-white text-center relative ${uploadBoxClassName}`}
-          style={uploadBoxStyle}
-        >
-          <div className="flex flex-col items-center text-black">
-            {uploadIcon}
-            <span className="text-sm text-gray-800">{uploadText}</span>
-            <span className="text-sm text-gray-800">{dragAndDropText}</span>
-            <span className="text-gray-600 text-xs">{fileTypeText}</span>
+        <div className="flex flex-col items-center justify-center text-center">
+          {uploadIcon}
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-gray-700">{uploadText}</p>
+            <p className="text-sm text-gray-500">{dragAndDropText}</p>
+            <p className="text-xs text-gray-400">{fileTypeText}</p>
           </div>
           <input
             type="file"
             accept={allowedFileTypes.join(",")}
             multiple={multiple}
             onChange={handleImageChange}
-            className="absolute inset-0 opacity-0 cursor-pointer rounded-lg"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
         </div>
+      </div>
 
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {mode === "update" &&
           defaultImages.map(
             (url, index) =>
               !removedDefaultImages.includes(index) && (
-                <div key={`default-${index}`} className="relative w-fit">
+                <div
+                  key={`default-${index}`}
+                  className="relative group aspect-square rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                >
                   <img
                     src={url}
                     alt={`Existing Image ${index + 1}`}
-                    className={`h-24 w-24 object-cover ${imageClassName}`}
+                    className={`h-full w-full object-cover ${imageClassName}`}
                     style={imageStyle}
                   />
-                  <div onClick={() => removeDefaultImage(index)}>
+                  <div
+                    onClick={() => removeDefaultImage(index)}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  >
                     {deleteIcon}
                   </div>
                 </div>
@@ -174,14 +193,22 @@ export function ImageUploader({
           )}
 
         {images.map((image, index) => (
-          <div key={index} className="relative w-fit">
+          <div
+            key={index}
+            className="relative group aspect-square rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+          >
             <img
               src={URL.createObjectURL(image)}
               alt={`Preview ${index + 1}`}
-              className={`h-24 w-24 object-cover ${imageClassName}`}
+              className={`h-full w-full object-cover ${imageClassName}`}
               style={imageStyle}
             />
-            <div onClick={() => removeImage(index)}>{deleteIcon}</div>
+            <div
+              onClick={() => removeImage(index)}
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            >
+              {deleteIcon}
+            </div>
           </div>
         ))}
       </div>
