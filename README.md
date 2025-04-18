@@ -16,11 +16,11 @@ A modern React component for handling image uploads with drag-and-drop functiona
 ## Installation
 
 ```bash
-npm install ultra-image-uploaderer
+npm install ultra-image-uploader
 # or
-yarn add ultra-image-uploaderer
+yarn add ultra-image-uploader
 # or
-pnpm add ultra-image-uploaderer
+pnpm add ultra-image-uploader
 ```
 
 ## Quick Start
@@ -28,16 +28,16 @@ pnpm add ultra-image-uploaderer
 ### Basic Usage
 
 ```tsx
-import { ImageUploader, imageUrl } from "ultra-image-uploaderer";
+import { ImageUploader } from "ultra-image-uploader";
 import { useState } from "react";
 
 function App() {
-  const [images, setImages] = useState<File[]>([]);
+  const [imageFiles, setImagesFiles] = useState<File[]>([]);
 
   return (
     <ImageUploader
-      images={images}
-      setImages={setImages}
+      images={imageFiles}
+      setImages={setImagesFiles}
       mode="add"
       multiple={true}
     />
@@ -48,154 +48,99 @@ function App() {
 ### With ImgBB Integration
 
 ```tsx
-import { ImageUploader, imageUrl } from "ultra-image-uploaderer";
+import { ImageUploader, uploadImagesToImageBB } from "ultra-image-uploader";
 import { useState } from "react";
 
 function ImageUploadForm() {
   const [images, setImages] = useState<File[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleGetImageUrl = async () => {
+    setLoading(true);
     try {
-      const uploadedUrls = await imageUrl(images, "YOUR_IMGBB_API_KEY");
-      console.log("Uploaded image URLs:", uploadedUrls);
+      const result = await uploadImagesToImageBB(
+        images,
+        "your-imgbb-api-key-here"
+      );
+      console.log("Uploaded URLs:", result.urls);
     } catch (error) {
-      console.error("Upload failed:", error);
+      console.error("Error uploading images:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       <ImageUploader
         images={images}
         setImages={setImages}
         mode="add"
         multiple={true}
       />
-      <button type="submit">Upload Images</button>
-    </form>
+      <button
+        onClick={handleGetImageUrl}
+        disabled={loading || images.length === 0}
+        className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"
+      >
+        {loading ? "Uploading..." : "Upload Images"}
+      </button>
+    </div>
   );
 }
 ```
 
 ## Component Props
 
-| Prop                    | Type                                  | Default                       | Description                      |
-| ----------------------- | ------------------------------------- | ----------------------------- | -------------------------------- |
-| `images`                | `File[]`                              | Required                      | Array of selected image files    |
-| `setImages`             | `(images: File[]) => void`            | Required                      | Function to update images array  |
-| `mode`                  | `"add" \| "update"`                   | Required                      | Mode of operation                |
-| `defaultImages`         | `string[]`                            | `[]`                          | Array of existing image URLs     |
-| `multiple`              | `boolean`                             | `false`                       | Allow multiple file selection    |
-| `maxFileSize`           | `number`                              | `5242880`                     | Maximum file size in bytes (5MB) |
-| `allowedFileTypes`      | `string[]`                            | `["image/jpeg", "image/png"]` | Allowed MIME types               |
-| `containerClassName`    | `string`                              | `""`                          | Custom container class           |
-| `uploadBoxClassName`    | `string`                              | `""`                          | Custom upload box class          |
-| `imageClassName`        | `string`                              | `""`                          | Custom image preview class       |
-| `uploadBoxStyle`        | `React.CSSProperties`                 | `{}`                          | Custom upload box styles         |
-| `imageStyle`            | `React.CSSProperties`                 | `{}`                          | Custom image preview styles      |
-| `uploadIcon`            | `React.ReactNode`                     | `<UploadCloudIcon />`         | Custom upload icon               |
-| `deleteIcon`            | `React.ReactNode`                     | `<TrashIcon />`               | Custom delete icon               |
-| `uploadText`            | `string`                              | `"Choose files to upload"`    | Upload box text                  |
-| `dragAndDropText`       | `string`                              | `"Drag and drop files here"`  | Drag and drop text               |
-| `fileTypeText`          | `string`                              | `"PNG, JPG, or JPEG files"`   | File type info text              |
-| `onUpload`              | `(files: File[]) => void`             | -                             | Upload callback                  |
-| `onRemove`              | `(file: File, index: number) => void` | -                             | Remove callback                  |
-| `onFileValidationError` | `(error: string) => void`             | -                             | Validation error callback        |
+| Prop             | Type                     | Default    | Description |
+|------------------|--------------------------|------------|-------------|
+| `images`         | `File[]`                 | Required   | Array of selected image files |
+| `setImages`      | `(files: File[]) => void`| Required   | Function to update images array |
+| `mode`           | `"add" | "update"`      | Required   | Component operation mode |
+| `defaultImages`  | `string[]`               | `[]`       | Existing image URLs for update mode |
+| `multiple`       | `boolean`                | `false`    | Allow multiple file selection |
+| `inputStyles`    | `string`                 | `""`       | Custom CSS classes for upload input |
+| `containerStyles`| `string`                 | `""`       | Custom CSS classes for container |
+| `uploadText`     | `string`                 | `"Browse files or drag & drop"` | Upload area text |
+| `typeText`       | `string`                 | `"PNG, JPG, JPEG, WEBP"` | Allowed file types text |
 
-## Usage Examples
 
-### Add Mode (New Upload)
+## ImgBB Utility
 
-```tsx
-import { ImageUploader, imageUrl } from "ultra-image-uploaderer";
+The package includes a utility function for uploading to ImgBB:
 
-function AddImage() {
-  const [images, setImages] = useState<File[]>([]);
-
-  const handleSubmit = async () => {
-    const imgUrls = await imageUrl(images, "YOUR_IMGBB_API_KEY");
-    // Handle the uploaded image URLs
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <ImageUploader
-        images={images}
-        setImages={setImages}
-        mode="add"
-        multiple={true}
-        uploadBoxClassName="border-3 border-dashed p-5"
-        imageClassName="w-20 h-20"
-      />
-      <button type="submit">Upload</button>
-    </form>
-  );
+```ts
+interface ImageBBUrlResult {
+  urls: string[];
 }
+
+async function uploadImagesToImageBB(
+  images: File[],
+  apiKey: string
+): Promise<ImageBBUrlResult>
 ```
 
-### Update Mode (Edit Existing Images)
+## Development
 
-```tsx
-function UpdateImage() {
-  const [images, setImages] = useState<File[]>([]);
-  const existingImages = ["https://example.com/image1.jpg"];
+To contribute to this project:
 
-  const handleSubmit = async () => {
-    const newImgUrls = await imageUrl(images, "YOUR_IMGBB_API_KEY");
-    // Combine existing and new images
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <ImageUploader
-        images={images}
-        setImages={setImages}
-        mode="update"
-        multiple={true}
-        defaultImages={existingImages}
-        uploadBoxClassName="border-3 border-dashed p-5"
-        imageClassName="w-20 h-20"
-      />
-      <button type="submit">Update</button>
-    </form>
-  );
-}
-```
-
-## Styling
-
-The component uses Tailwind CSS classes by default but can be customized using className props:
-
-```tsx
-<ImageUploader
-  images={images}
-  setImages={setImages}
-  mode="add"
-  containerClassName="max-w-2xl mx-auto"
-  uploadBoxClassName="border-2 border-dashed border-blue-500 rounded-lg"
-  imageClassName="rounded-lg shadow-md"
-/>
-```
-
-## ImgBB Integration
-
-The package includes a utility function `imageUrl` for uploading images to ImgBB:
-
-```typescript
-const uploadImages = async (files: File[]) => {
-  try {
-    const urls = await imageUrl(files, "YOUR_IMGBB_API_KEY");
-    console.log("Uploaded URLs:", urls);
-  } catch (error) {
-    console.error("Upload failed:", error);
-  }
-};
-```
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   yarn
+   ```
+3. Make your changes
+4. Run the build:
+   ```bash
+   yarn build
+   ```
+5. Test your changes
+6. Submit a pull request
 
 ## License
 
-MIT
+MIT © Digontha Das
 
-## Contributing
+## Support
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+For support or feature requests, please [open an issue](https://github.com/yourusername/ultra-image-uploader/issues) on GitHub.
