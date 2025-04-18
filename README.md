@@ -16,11 +16,11 @@ A modern React component for handling image uploads with drag-and-drop functiona
 ## Installation
 
 ```bash
-npm install ultra-image-uploader
+npm install ultra-image-uploaderer
 # or
-yarn add ultra-image-uploader
+yarn add ultra-image-uploaderer
 # or
-pnpm add ultra-image-uploader
+pnpm add ultra-image-uploaderer
 ```
 
 ## Quick Start
@@ -28,7 +28,7 @@ pnpm add ultra-image-uploader
 ### Basic Usage
 
 ```tsx
-import { ImageUploader, imageUrl } from "ultra-image-uploader";
+import { ImageUploader, imageUrl } from "ultra-image-uploaderer";
 import { useState } from "react";
 
 function App() {
@@ -48,7 +48,7 @@ function App() {
 ### With ImgBB Integration
 
 ```tsx
-import { ImageUploader, imageUrl } from "ultra-image-uploader";
+import { ImageUploader, imageUrl } from "ultra-image-uploaderer";
 import { useState } from "react";
 
 function ImageUploadForm() {
@@ -107,7 +107,7 @@ function ImageUploadForm() {
 ### Add Mode (New Upload)
 
 ```tsx
-import { ImageUploader, imageUrl } from "ultra-image-uploader";
+import { ImageUploader, imageUrl } from "ultra-image-uploaderer";
 
 function AddImage() {
   const [images, setImages] = useState<File[]>([]);

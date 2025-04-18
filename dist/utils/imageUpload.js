@@ -27,6 +27,5 @@ export const uploadImagesToImageBB = async (images, apiKey) => {
     }
     return {
         urls: imageURLs,
-        apiKey: apiKey
     };
 };

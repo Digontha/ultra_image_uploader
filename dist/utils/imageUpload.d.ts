@@ -6,6 +6,5 @@ export interface ImageBBResponse {
 }
 export interface ImageBBUrlResult {
     urls: string[];
-    apiKey: string;
 }
 export declare const uploadImagesToImageBB: (images: File[], apiKey: string) => Promise<ImageBBUrlResult>;

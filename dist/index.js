@@ -1,3 +1,2 @@
-import { ImageUploader } from "./ProImageUploader";
-import { uploadImagesToImageBB } from "./helper/ImageBB/ImageBBUrl";
-export { ImageUploader, uploadImagesToImageBB };
+export { ImageUploader } from './components/ImageUploader';
+export { uploadImagesToImageBB } from './utils/imageUpload';
