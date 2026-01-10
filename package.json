@@ -1,27 +1,63 @@
 {
   "name": "ultra-image-uploader",
-  "version": "0.0.1",
-  "description": "React component for image uploads with drag-and-drop and ImgBB integration",
+  "version": "1.0.0",
+  "description": "A modern, feature-rich React image upload component with support for ImgBB and Cloudinary",
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build"
-  },
-  "dependencies": {
-    "@types/node": "^22.13.14",
-    "lucide-react": "^0.485.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
-  },
-  "devDependencies": {
-    "@types/react": "^19.1.1"
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build",
+    "clean": "rm -rf dist"
   },
   "keywords": [
     "react",
-    "form",
-    "typescript"
+    "image-upload",
+    "file-upload",
+    "imgbb",
+    "cloudinary",
+    "drag-and-drop",
+    "image-hosting",
+    "upload-component",
+    "typescript",
+    "react-component",
+    "image-uploader",
+    "multiple-upload",
+    "cloudinary-upload",
+    "imgbb-upload",
+    "progress-tracking",
+    "file-validation",
+    "themeable"
   ],
   "author": "Digontha Das",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digontha/ultra-image-uploader.git"
+  },
+  "bugs": {
+    "url": "https://github.com/digontha/ultra-image-uploader/issues"
+  },
+  "homepage": "https://github.com/digontha/ultra-image-uploader#readme",
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "dependencies": {
+    "lucide-react": "^0.485.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.1",
+    "@types/node": "^22.13.14",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }
