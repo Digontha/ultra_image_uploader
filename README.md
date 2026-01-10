@@ -2,13 +2,13 @@
 
 <div align="center">
 
-A modern, beautiful React image upload component with progress tracking, drag-and-drop, and multi-provider support.
+A modern, fancy React image upload component with responsive grid layout, drag-and-drop reordering, and beautiful animations.
 
 [![npm version](https://badge.fury.io/js/ultra-image-uploader.svg)](https://www.npmjs.com/package/ultra-image-uploader)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
 
-**Modern UI** • **Progress Bars** • **ImgBB & Cloudinary** • **Auto Import Ready**
+**Modern UI** • **Dark/Light Themes** • **Grid Layout** • **Drag Reorder**
 
 </div>
 
@@ -16,19 +16,20 @@ A modern, beautiful React image upload component with progress tracking, drag-an
 
 ## Features
 
-- **Modern UI** - Clean, professional file upload interface matching industry standards
-- **Progress Tracking** - Real-time upload progress with smooth animations
-- **Drag & Drop** - Intuitive drag-and-drop file handling
-- **Multiple Providers** - Built-in support for ImgBB and Cloudinary
-- **File Validation** - Type and size validation with helpful error messages
-- **Auto Upload** - Optional automatic upload on file selection
-- **Cancel/Remove** - Easy file management with cancel buttons
-- **TypeScript** - Fully typed for excellent DX
-- **Auto Import** - Works seamlessly with VS Code, WebStorm, and all popular editors
+- **Modern UI** - Beautiful card-based design with shadows and rounded corners
+- **Responsive Grid** - Adaptive grid layout (2-6 columns) for all screen sizes
+- **Drag & Drop** - Upload files by dragging or clicking
+- **Live Previews** - Instant image thumbnails with metadata
+- **Drag Reorder** - Rearrange images by dragging
+- **Progress Tracking** - Real-time upload progress with animations
+- **Theme Support** - Built-in light/dark theme toggle
+- **Smooth Animations** - Hover effects, fade transitions, scale animations
+- **Keyboard Accessible** - Full keyboard navigation support
+- **File Validation** - Size and type validation
+- **Multiple Providers** - ImgBB & Cloudinary support
+- **Auto Import** - Works with VS Code, WebStorm, and all editors
 
 ## Installation
-
-Install with any package manager:
 
 ```bash
 # npm
@@ -58,140 +59,175 @@ function App() {
       images={images}
       setImages={setImages}
       multiple
+      gridCols={4}
     />
   );
 }
 ```
 
-## Usage Examples
+## Props
 
-### Basic File Upload
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `images` | `File[]` | **Required** | Selected image files |
+| `setImages` | `(files: File[]) => void` | **Required** | Update images state |
+| `multiple` | `boolean` | `true` | Allow multiple files |
+| `maxSize` | `number` | `52428800` | Max file size (50MB) |
+| `allowedTypes` | `string[]` | Image types | Allowed MIME types |
+| `maxImages` | `number` | `20` | Maximum images allowed |
+| `theme` | `'light' \| 'dark'` | `undefined` | Theme (uses internal if not set) |
+| `onThemeChange` | `(theme) => void` | `undefined` | Theme change callback |
+| `showThemeToggle` | `boolean` | `true` | Show theme toggle button |
+| `showImageCount` | `boolean` | `true` | Show image count header |
+| `enableReorder` | `boolean` | `true` | Enable drag reordering |
+| `gridCols` | `number` | `4` | Grid columns (2-6) |
+| `cardClassName` | `string` | `''` | Custom card class |
+| `containerClassName` | `string` | `'max-w-5xl mx-auto'` | Container styling |
+| `uploadText` | `string` | `'Click or drag...'` | Upload area text |
+| `dragText` | `string` | `'Drop images here'` | Drag over text |
+| `autoUpload` | `boolean` | `false` | Auto-upload on selection |
+| `uploadConfig` | `{ provider, config }` | `undefined` | Upload configuration |
+| `onUploadComplete` | `(urls: string[]) => void` | `undefined` | Success callback |
+| `onUploadError` | `(error: Error) => void` | `undefined` | Error callback |
 
-```tsx
-import { ImageUploader } from "ultra-image-uploader";
+## Examples
 
-function BasicUpload() {
-  const [images, setImages] = useState<File[]>([]);
-
-  const handleUploadComplete = (urls: string[]) => {
-    console.log('Uploaded URLs:', urls);
-  };
-
-  return (
-    <ImageUploader
-      images={images}
-      setImages={setImages}
-      multiple
-      maxSize={50 * 1024 * 1024} // 50MB
-      onUploadComplete={handleUploadComplete}
-      uploadConfig={{
-        provider: 'imgbb',
-        config: { apiKey: 'your-api-key' }
-      }}
-    />
-  );
-}
-```
-
-### Upload with ImgBB
-
-```tsx
-import { ImageUploader } from "ultra-image-uploader";
-
-function ImgBBUpload() {
-  const [images, setImages] = useState<File[]>([]);
-
-  return (
-    <div>
-      <ImageUploader
-        images={images}
-        setImages={setImages}
-        multiple
-        uploadConfig={{
-          provider: 'imgbb',
-          config: { apiKey: process.env.IMGBB_API_KEY }
-        }}
-        onUploadComplete={(urls) => {
-          console.log('Images uploaded to ImgBB:', urls);
-        }}
-      />
-    </div>
-  );
-}
-```
-
-### Upload with Cloudinary
-
-```tsx
-import { ImageUploader } from "ultra-image-uploader";
-
-function CloudinaryUpload() {
-  const [images, setImages] = useState<File[]>([]);
-
-  return (
-    <ImageUploader
-      images={images}
-      setImages={setImages}
-      multiple
-      uploadConfig={{
-        provider: 'cloudinary',
-        config: {
-          cloudName: 'your-cloud-name',
-          uploadPreset: 'your-upload-preset'
-        }
-      }}
-      onUploadComplete={(urls) => {
-        console.log('Images uploaded to Cloudinary:', urls);
-      }}
-    />
-  );
-}
-```
-
-### Auto Upload Mode
+### Basic Grid Layout
 
 ```tsx
 <ImageUploader
   images={images}
   setImages={setImages}
   multiple
-  autoUpload
-  uploadConfig={{
-    provider: 'imgbb',
-    config: { apiKey: 'your-api-key' }
-  }}
+  gridCols={4}
 />
 ```
 
-### Single File Upload
+### Dark Theme
+
+```tsx
+function DarkExample() {
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [images, setImages] = useState<File[]>([]);
+
+  return (
+    <div className={theme === 'dark' ? 'dark' : ''}>
+      <ImageUploader
+        images={images}
+        setImages={setImages}
+        theme={theme}
+        onThemeChange={setTheme}
+        multiple
+        gridCols={3}
+      />
+    </div>
+  );
+}
+```
+
+### Custom Grid & Styling
 
 ```tsx
 <ImageUploader
-  images={avatar}
-  setImages={setAvatar}
-  multiple={false}
-  maxSize={2 * 1024 * 1024} // 2MB
+  images={images}
+  setImages={setImages}
+  gridCols={3}
+  maxImages={10}
+  maxSize={10 * 1024 * 1024}
+  containerClassName="max-w-4xl mx-auto"
+  cardClassName="border-2"
 />
 ```
 
-## Component Props
+### Without Reordering
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `images` | `File[]` | **Required** | Selected image files |
-| `setImages` | `(files: File[]) => void` | **Required** | Update images state |
-| `multiple` | `boolean` | `true` | Allow multiple file selection |
-| `maxSize` | `number` | `52428800` | Max file size in bytes (50MB) |
-| `allowedTypes` | `string[]` | Image types | Allowed MIME types |
-| `className` | `string` | `''` | Extra CSS classes |
-| `autoUpload` | `boolean` | `false` | Auto-upload on selection |
-| `uploadConfig` | `{ provider, config }` | `undefined` | Upload configuration |
-| `onUploadComplete` | `(urls: string[]) => void` | `undefined` | Upload success callback |
-| `onUploadError` | `(error: Error) => void` | `undefined` | Upload error callback |
+```tsx
+<ImageUploader
+  images={images}
+  setImages={setImages}
+  enableReorder={false}
+  gridCols={5}
+/>
+```
+
+### With Upload (ImgBB)
+
+```tsx
+function UploadExample() {
+  const [images, setImages] = useState<File[]>([]);
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      multiple
+      gridCols={4}
+      uploadConfig={{
+        provider: 'imgbb',
+        config: { apiKey: process.env.IMGBB_API_KEY }
+      }}
+      onUploadComplete={(urls) => {
+        console.log('Uploaded:', urls);
+      }}
+    />
+  );
+}
+```
+
+### Responsive Grid
+
+```tsx
+// 2 columns on mobile, 4 on desktop
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+  <ImageUploader images={images} setImages={setImages} gridCols={1} />
+</div>
+```
+
+## Theme Support
+
+The component includes built-in light and dark themes:
+
+```tsx
+// Controlled theme
+<ImageUploader
+  images={images}
+  setImages={setImages}
+  theme="dark"
+  showThemeToggle={false}
+/>
+
+// Uncontrolled theme (with toggle)
+<ImageUploader
+  images={images}
+  setImages={setImages}
+  showThemeToggle={true}
+/>
+```
+
+## Animations
+
+The component includes smooth animations:
+- Scale effect on drag over
+- Fade-in/out for previews
+- Hover scale on image cards
+- Smooth progress bar transitions
+- Button hover effects
+
+## Accessibility
+
+- Keyboard accessible (Enter/Space to upload)
+- Focus indicators on drag area
+- ARIA-compatible markup
+- Screen reader friendly
+
+## Responsive Design
+
+The grid layout adapts to screen sizes:
+- Default: `max-w-5xl mx-auto` container
+- Configurable grid columns (2-6)
+- Works on mobile, tablet, and desktop
 
 ## Upload Functions
-
-You can also use the upload functions directly:
 
 ```tsx
 import {
@@ -201,137 +237,66 @@ import {
   uploadImagesToCloudinary
 } from "ultra-image-uploader";
 
-// Upload single image
-const result = await uploadImage(file, 'imgbb', { apiKey: 'key' });
+// Upload with progress
+const result = await uploadImage(file, 'imgbb', { apiKey }, {
+  onProgress: (p) => console.log(p.percentage)
+});
 
-// Upload multiple images
+// Multiple uploads
 const results = await uploadImages(files, 'cloudinary', {
   cloudName: 'your-cloud'
 });
-
-// Convenience functions
-const { urls } = await uploadImagesToImageBB(images, apiKey);
-const uploads = await uploadImagesToCloudinary(images, config);
 ```
 
 ## API Configuration
 
 ### ImgBB
-
-1. Go to [imgbb.com/settings/api](https://imgbb.com/settings/api)
-2. Copy your API key
-3. Use in the component:
-
-```tsx
-uploadConfig={{
-  provider: 'imgbb',
-  config: { apiKey: 'your-api-key' }
-}}
-```
+1. Get API key from [imgbb.com/settings/api](https://imgbb.com/settings/api)
+2. Use `{ provider: 'imgbb', config: { apiKey } }`
 
 ### Cloudinary
-
 1. Sign up at [cloudinary.com](https://cloudinary.com)
-2. Get your **cloud name** from dashboard
-3. Create an **upload preset** (Settings → Upload → Upload presets)
-4. Use in the component:
+2. Get cloud name and create upload preset
+3. Use `{ provider: 'cloudinary', config: { cloudName, uploadPreset } }`
 
-```tsx
-uploadConfig={{
-  provider: 'cloudinary',
-  config: {
-    cloudName: 'your-cloud-name',
-    uploadPreset: 'your-upload-preset'
-  }
-}}
-```
+## Customization
 
-## TypeScript
-
-All exports are fully typed:
-
-```tsx
-import type {
-  ImageUploaderProps,
-  UploadProvider,
-  UploadResult,
-  ProviderConfig,
-  UploadOptions
-} from "ultra-image-uploader";
-```
-
-## Auto Import Support
-
-This package supports auto-import in all major editors:
-
-- **VS Code** - Auto-suggestions work out of the box
-- **WebStorm** - Full IntelliSense support
-- **Neovim** - Works with LSP and completion plugins
-- **Sublime Text** - Works with LSP packages
-- **All TypeScript editors** - Full type checking and suggestions
-
-## Styling
-
-The component uses Tailwind CSS classes. You can add custom styling:
+### Card Styling
 
 ```tsx
 <ImageUploader
   images={images}
   setImages={setImages}
-  className="max-w-2xl mx-auto"
+  cardClassName="border-2 border-purple-500"
 />
 ```
 
-### Custom Styling
-
-For complete customization, you can wrap and override styles:
+### Container Size
 
 ```tsx
-<div className="your-custom-wrapper">
-  <ImageUploader
-    images={images}
-    setImages={setImages}
-    className="your-custom-class"
-  />
-</div>
+<ImageUploader
+  images={images}
+  setImages={setImages}
+  containerClassName="max-w-7xl mx-auto"
+/>
 ```
 
-## Troubleshooting
+### Grid Columns
 
-### Auto imports not working
+```tsx
+// 2 columns
+<ImageUploader gridCols={2} />
 
-**VS Code:**
-1. Ensure TypeScript is enabled in your project
-2. Restart the TypeScript server: `Cmd/Ctrl + Shift + P` → "TypeScript: Restart TS Server"
-3. Check that `node_modules/ultra-image-uploader` exists
-
-**WebStorm:**
-1. Invalidate caches: `File` → `Invalidate Caches and Restart`
-2. Ensure TypeScript plugin is enabled
-
-### Uploads failing
-
-1. **Check API keys** - Verify your ImgBB or Cloudinary credentials
-2. **CORS issues** - Ensure your domain is whitelisted
-3. **File size** - Check if file exceeds provider limits
-4. **Network** - Check browser console for network errors
-
-### TypeScript errors
-
-```bash
-# Reinstall dependencies
-rm -rf node_modules package-lock.json
-npm install
-
-# Restart TypeScript server in your editor
+// 6 columns
+<ImageUploader gridCols={6} />
 ```
 
-### Build issues
+## TypeScript
 
-```bash
-# Clean and rebuild
-npm run clean
-npm run build
+Full TypeScript support:
+
+```tsx
+import type { ImageUploaderProps } from "ultra-image-uploader";
 ```
 
 ## Browser Support
@@ -339,12 +304,21 @@ npm run build
 - Chrome/Edge (latest)
 - Firefox (latest)
 - Safari (latest)
-- Mobile browsers (iOS Safari, Chrome Mobile)
+- Mobile browsers
 
-## Requirements
+## Troubleshooting
 
-- React >= 18.0.0
-- TypeScript (optional but recommended)
+### Auto imports not working
+- Restart TypeScript server in your editor
+- Ensure `node_modules` exists
+
+### Theme not applying
+- Wrap parent div with `dark` class for dark mode
+- Check Tailwind CSS dark mode config
+
+### Grid not responsive
+- Adjust `gridCols` prop for different breakpoints
+- Use wrapper with responsive classes
 
 ## License
 
@@ -354,16 +328,7 @@ MIT © Digontha Das
 
 - [GitHub](https://github.com/digontha/ultra-image-uploader)
 - [NPM](https://www.npmjs.com/package/ultra-image-uploader)
-- [Report Issues](https://github.com/digontha/ultra-image-uploader/issues)
-
-## Changelog
-
-### v2.0.0
-- 🎨 Modern UI redesign with progress bars
-- ✅ Auto import support for all editors
-- 📦 Simplified package structure
-- 🚀 Improved drag-and-drop experience
-- 🎯 Better TypeScript support
+- [Issues](https://github.com/digontha/ultra-image-uploader/issues)
 
 ---
 

@@ -1,25 +1,36 @@
 'use client';
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, X, FileText, Loader2 } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, File, Moon, Sun, GripVertical } from 'lucide-react';
 import { uploadImage } from '../providers';
 import { isImageFile, formatFileSize } from '../utils/validation';
-export function ImageUploader({ images, setImages, multiple = true, maxSize = 50 * 1024 * 1024, allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'], className = '', onUploadComplete, onUploadError, autoUpload = false, uploadConfig, }) {
+export function ImageUploader({ images, setImages, multiple = true, maxSize = 50 * 1024 * 1024, allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'], maxImages = 20, className = '', containerClassName = 'max-w-5xl mx-auto', uploadText = 'Click or drag to upload images', dragText = 'Drop images here', theme: externalTheme, onThemeChange, showThemeToggle = true, showImageCount = true, enableReorder = true, gridCols = 4, cardClassName = '', onUploadComplete, onUploadError, autoUpload = false, uploadConfig, }) {
+    const [internalTheme, setInternalTheme] = useState('light');
     const [isDragging, setIsDragging] = useState(false);
     const [fileStates, setFileStates] = useState(new Map());
     const [uploading, setUploading] = useState(false);
+    const [draggedIndex, setDraggedIndex] = useState(null);
     const fileInputRef = useRef(null);
     const dragCounter = useRef(0);
-    // Initialize file states
+    const theme = externalTheme || internalTheme;
+    const isDark = theme === 'dark';
+    const handleThemeToggle = () => {
+        const newTheme = isDark ? 'light' : 'dark';
+        setInternalTheme(newTheme);
+        onThemeChange?.(newTheme);
+    };
+    // Generate previews
     useEffect(() => {
         const newStates = new Map();
         images.forEach((file) => {
             const key = `${file.name}-${file.size}`;
-            if (!fileStates.has(key)) {
-                newStates.set(key, { ...file, progress: 0, status: 'pending' });
+            const existing = fileStates.get(key);
+            if (existing?.preview) {
+                newStates.set(key, existing);
             }
             else {
-                newStates.set(key, fileStates.get(key));
+                const preview = isImageFile(file) ? URL.createObjectURL(file) : undefined;
+                newStates.set(key, { ...file, progress: 0, status: 'pending', preview });
             }
         });
         setFileStates(newStates);
@@ -79,7 +90,7 @@ export function ImageUploader({ images, setImages, multiple = true, maxSize = 50
         const valid = [];
         const invalid = [];
         Array.from(files).forEach((file) => {
-            if (!isImageFile(file)) {
+            if (!isImageFile(file) && !allowedTypes.includes(file.type)) {
                 invalid.push(file);
                 return;
             }
@@ -87,14 +98,13 @@ export function ImageUploader({ images, setImages, multiple = true, maxSize = 50
                 invalid.push(file);
                 return;
             }
-            if (!allowedTypes.includes(file.type)) {
-                invalid.push(file);
+            if (maxImages && images.length + valid.length >= maxImages) {
                 return;
             }
             valid.push(file);
         });
         return { valid, invalid };
-    }, [maxSize, allowedTypes]);
+    }, [maxSize, allowedTypes, maxImages, images.length]);
     const handleFiles = useCallback((files) => {
         const { valid } = validateFiles(files);
         if (valid.length === 0)
@@ -104,7 +114,7 @@ export function ImageUploader({ images, setImages, multiple = true, maxSize = 50
             return;
         }
         setImages(multiple ? [...images, ...valid] : [valid[0]]);
-    }, [images, multiple, setImages, validateFiles]);
+    }, [images, multiple, setImages, validateFiles, maxImages]);
     const handleChange = (e) => {
         if (e.target.files?.length) {
             handleFiles(e.target.files);
@@ -137,24 +147,80 @@ export function ImageUploader({ images, setImages, multiple = true, maxSize = 50
             handleFiles(e.dataTransfer.files);
         }
     };
-    const removeFile = (file) => {
-        setImages(images.filter((f) => f !== file));
+    const removeFile = (index) => {
+        setImages(images.filter((_, i) => i !== index));
+    };
+    const handleDragStart = (e, index) => {
+        if (!enableReorder)
+            return;
+        setDraggedIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+    };
+    const handleDragOverItem = (e, index) => {
+        if (!enableReorder || draggedIndex === null || draggedIndex === index)
+            return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+    const handleDropItem = (e, index) => {
+        if (!enableReorder || draggedIndex === null || draggedIndex === index)
+            return;
+        e.preventDefault();
+        const newImages = [...images];
+        const draggedItem = newImages[draggedIndex];
+        newImages.splice(draggedIndex, 1);
+        newImages.splice(index, 0, draggedItem);
+        setImages(newImages);
+        setDraggedIndex(null);
+    };
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
     };
     const getFileState = (file) => {
         const key = `${file.name}-${file.size}`;
         return fileStates.get(key) || { ...file, progress: 0, status: 'pending' };
     };
-    return (_jsxs("div", { className: `image-uploader ${className}`, children: [_jsxs("div", { className: "relative border-2 border-dashed border-gray-300 rounded-lg p-12 transition-colors duration-200", style: {
-                    borderColor: isDragging ? '#1E88E5' : undefined,
-                    backgroundColor: isDragging ? '#F5F5F5' : 'white',
-                }, onClick: () => fileInputRef.current?.click(), onDragEnter: handleDragEnter, onDragLeave: handleDragLeave, onDragOver: handleDragOver, onDrop: handleDrop, children: [_jsx("input", { ref: fileInputRef, type: "file", accept: allowedTypes.join(','), multiple: multiple, onChange: handleChange, className: "absolute inset-0 opacity-0 cursor-pointer" }), _jsxs("div", { className: "flex flex-col items-center justify-center", children: [_jsxs("div", { className: "relative mb-4", children: [_jsx("div", { className: "w-16 h-16 rounded-full border-2 border-gray-300 flex items-center justify-center bg-white", children: _jsx(FileText, { size: 32, className: "text-gray-400" }) }), _jsx("div", { className: "absolute -bottom-1 -right-1 w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center", children: _jsx(Upload, { size: 16, className: "text-white" }) })] }), _jsxs("p", { className: "text-base text-gray-700 mb-2", children: [_jsx("span", { className: "underline decoration-1 underline-offset-2 cursor-pointer hover:text-gray-900", children: "Click to upload" }), ' ', "or drag and drop"] }), _jsxs("p", { className: "text-sm text-gray-500", children: ["Maximum file size ", formatFileSize(maxSize)] })] })] }), images.length > 0 && (_jsx("div", { className: "mt-6 space-y-4", children: images.map((file) => {
-                    const state = getFileState(file);
-                    const isUploading = state.status === 'uploading';
-                    const isDone = state.status === 'done';
-                    return (_jsx("div", { className: "border border-gray-300 rounded-lg p-4 transition-all duration-200 hover:border-gray-400", children: _jsxs("div", { className: "flex items-start gap-4", children: [_jsx("div", { className: "w-10 h-10 rounded bg-gray-100 flex items-center justify-center flex-shrink-0", children: _jsx(FileText, { size: 20, className: "text-gray-500" }) }), _jsxs("div", { className: "flex-1 min-w-0", children: [_jsx("p", { className: "text-sm font-medium text-gray-900 truncate", children: file.name }), _jsx("p", { className: "text-sm text-gray-500", children: formatFileSize(file.size) }), isUploading || isDone ? (_jsx("div", { className: "mt-3", children: _jsxs("div", { className: "flex items-center justify-between mb-1", children: [_jsx("div", { className: "flex-1 mr-4", children: _jsx("div", { className: "w-full bg-gray-200 rounded-full h-1.5", children: _jsx("div", { className: "bg-gray-900 h-1.5 rounded-full transition-all duration-300", style: { width: `${state.progress || 0}%` } }) }) }), _jsxs("span", { className: "text-sm text-gray-700 font-medium", children: [state.progress || 0, "%"] })] }) })) : null] }), _jsx("button", { onClick: (e) => {
-                                        e.stopPropagation();
-                                        removeFile(file);
-                                    }, className: "flex-shrink-0 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors", children: _jsx(X, { size: 16 }) })] }) }, `${file.name}-${file.size}`));
-                }) })), images.length > 0 && !autoUpload && (_jsxs("div", { className: "mt-6 flex items-center justify-end gap-3", children: [_jsx("button", { onClick: () => setImages([]), className: "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors", children: "Cancel" }), _jsx("button", { onClick: handleAutoUpload, disabled: uploading, className: "px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2", children: uploading ? (_jsxs(_Fragment, { children: [_jsx(Loader2, { size: 16, className: "animate-spin" }), "Uploading..."] })) : ('Attach files') })] }))] }));
+    const gridColsClass = {
+        2: 'grid-cols-2',
+        3: 'grid-cols-3',
+        4: 'grid-cols-4',
+        5: 'grid-cols-5',
+        6: 'grid-cols-6',
+    }[gridCols] || 'grid-cols-4';
+    return (_jsxs("div", { className: `image-uploader ${containerClassName} ${className}`, children: [_jsxs("div", { className: "flex items-center justify-between mb-6", children: [_jsx("h2", { className: `text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`, children: "Upload Images" }), showImageCount && (_jsxs("span", { className: `text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`, children: [images.length, " ", maxImages ? `/ ${maxImages}` : '', " images"] }))] }), _jsxs("div", { className: `relative rounded-2xl border-2 border-dashed transition-all duration-300 ${isDragging
+                    ? 'border-blue-500 bg-blue-50 scale-[1.02]'
+                    : isDark
+                        ? 'border-gray-600 bg-gray-800/50 hover:border-gray-500'
+                        : 'border-gray-300 bg-gray-50 hover:border-gray-400'}`, style: {
+                    boxShadow: isDark
+                        ? '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)'
+                        : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                }, onClick: () => fileInputRef.current?.click(), onDragEnter: handleDragEnter, onDragLeave: handleDragLeave, onDragOver: handleDragOver, onDrop: handleDrop, tabIndex: 0, onKeyDown: (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        fileInputRef.current?.click();
+                    }
+                }, onFocus: (e) => e.currentTarget.classList.add('ring-2', 'ring-blue-500'), onBlur: (e) => e.currentTarget.classList.remove('ring-2', 'ring-blue-500'), children: [_jsx("input", { ref: fileInputRef, type: "file", accept: allowedTypes.join(','), multiple: multiple, onChange: handleChange, className: "absolute inset-0 opacity-0 cursor-pointer", style: { zIndex: 10 } }), _jsxs("div", { className: "flex flex-col items-center justify-center p-12", children: [_jsxs("div", { className: `relative mb-4 transition-transform duration-300 ${isDragging ? 'scale-110' : 'scale-100'}`, children: [_jsx("div", { className: `w-20 h-20 rounded-full flex items-center justify-center ${isDark ? 'bg-gray-700' : 'bg-white'}`, style: {
+                                            boxShadow: isDark
+                                                ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
+                                                : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                                        }, children: _jsx(ImageIcon, { size: 40, className: isDark ? 'text-gray-400' : 'text-gray-500' }) }), _jsx("div", { className: `absolute -bottom-2 -right-2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isDragging ? 'scale-125' : 'scale-100'} ${isDark ? 'bg-blue-600' : 'bg-blue-500'}`, children: _jsx(Upload, { size: 20, className: "text-white" }) })] }), _jsx("p", { className: `text-lg font-semibold mb-2 transition-colors ${isDark ? 'text-white' : 'text-gray-900'}`, children: isDragging ? dragText : uploadText }), _jsxs("p", { className: `text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`, children: ["Maximum file size ", formatFileSize(maxSize)] }), maxImages && (_jsxs("p", { className: `text-xs mt-2 ${isDark ? 'text-gray-500' : 'text-gray-400'}`, children: ["Up to ", maxImages, " images"] }))] })] }), showThemeToggle && !externalTheme && (_jsx("div", { className: "flex justify-end mt-4", children: _jsxs("button", { onClick: handleThemeToggle, className: `flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isDark
+                        ? 'bg-gray-800 hover:bg-gray-700 text-gray-200'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`, children: [isDark ? _jsx(Sun, { size: 18 }) : _jsx(Moon, { size: 18 }), _jsxs("span", { className: "text-sm font-medium", children: [isDark ? 'Light' : 'Dark', " Mode"] })] }) })), images.length > 0 && (_jsx("div", { className: "mt-8", children: _jsx("div", { className: `grid gap-4 ${gridColsClass} ${isDark ? 'text-white' : 'text-gray-900'}`, children: images.map((file, index) => {
+                        const state = getFileState(file);
+                        const isUploading = state.status === 'uploading';
+                        const isDone = state.status === 'done';
+                        return (_jsx("div", { draggable: enableReorder, onDragStart: (e) => handleDragStart(e, index), onDragOver: (e) => handleDragOverItem(e, index), onDrop: (e) => handleDropItem(e, index), onDragEnd: handleDragEnd, className: `group relative ${cardClassName} ${draggedIndex === index ? 'opacity-50' : ''}`, children: _jsxs("div", { className: `relative overflow-hidden rounded-xl transition-all duration-300 ${isDark
+                                    ? 'bg-gray-800 hover:bg-gray-750'
+                                    : 'bg-white hover:bg-gray-50'}`, style: {
+                                    boxShadow: isDark
+                                        ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
+                                        : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                                }, children: [enableReorder && (_jsx("div", { className: `absolute top-2 left-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-20 ${isDark ? 'bg-gray-700' : 'bg-white'}`, style: { boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }, children: _jsx(GripVertical, { size: 16, className: isDark ? 'text-gray-400' : 'text-gray-500' }) })), _jsx("button", { onClick: (e) => {
+                                            e.stopPropagation();
+                                            removeFile(index);
+                                        }, className: "absolute top-2 right-2 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all z-20 hover:scale-110 bg-red-500 hover:bg-red-600 text-white", style: { boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }, children: _jsx(X, { size: 16 }) }), _jsxs("div", { className: "relative aspect-square", children: [state.preview ? (_jsx("img", { src: state.preview, alt: file.name, className: "w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" })) : (_jsx("div", { className: `w-full h-full flex items-center justify-center ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`, children: _jsx(File, { size: 48, className: isDark ? 'text-gray-500' : 'text-gray-400' }) })), (isUploading || isDone) && (_jsx("div", { className: "absolute inset-0 bg-black/60 flex items-center justify-center", children: _jsx("div", { className: "text-center", children: isUploading ? (_jsxs(_Fragment, { children: [_jsx("div", { className: "w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-2" }), _jsxs("p", { className: "text-white font-semibold", children: [state.progress, "%"] })] })) : (_jsx("div", { className: "w-16 h-16 bg-green-500 rounded-full flex items-center justify-center", children: _jsx("svg", { className: "w-8 h-8 text-white", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: _jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 3, d: "M5 13l4 4L19 7" }) }) })) }) }))] }), _jsxs("div", { className: "p-3", children: [_jsx("p", { className: `text-sm font-medium truncate mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`, children: file.name }), _jsx("p", { className: `text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`, children: formatFileSize(file.size) }), isUploading && (_jsx("div", { className: "mt-2", children: _jsx("div", { className: "w-full bg-gray-200 rounded-full h-1", children: _jsx("div", { className: "bg-blue-500 h-1 rounded-full transition-all duration-300", style: { width: `${state.progress}%` } }) }) }))] })] }) }, `${file.name}-${file.size}`));
+                    }) }) })), images.length > 0 && !autoUpload && (_jsxs("div", { className: "mt-6 flex items-center justify-end gap-3", children: [_jsx("button", { onClick: () => setImages([]), className: `px-6 py-2.5 text-sm font-medium rounded-lg transition-all ${isDark
+                            ? 'bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700'
+                            : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-300'}`, children: "Clear All" }), _jsx("button", { onClick: handleAutoUpload, disabled: uploading, className: "px-6 py-2.5 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-lg hover:scale-105 flex items-center gap-2", children: uploading ? (_jsxs(_Fragment, { children: [_jsx("div", { className: "w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" }), "Uploading..."] })) : (_jsxs(_Fragment, { children: [_jsx(Upload, { size: 16 }), "Upload ", images.length, " ", images.length === 1 ? 'Image' : 'Images'] })) })] }))] }));
 }
 //# sourceMappingURL=ImageUploader.js.map
