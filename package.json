@@ -1,7 +1,7 @@
 {
   "name": "ultra-image-uploader",
-  "version": "2.0.2",
-  "description": "A modern, beautiful React image upload component with ImgBB & Cloudinary support",
+  "version": "3.0.3",
+  "description": "A modern, shadcn/ui-inspired React image upload component with beautiful themes, drag-and-drop, and smooth animations",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

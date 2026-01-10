@@ -1,29 +1,104 @@
 import type { UploadProvider, ProviderConfig } from '../types';
+export declare const themes: {
+    nature: {
+        name: string;
+        colors: {
+            primary: string;
+            primaryHover: string;
+            background: string;
+            border: string;
+            text: string;
+            textSecondary: string;
+            cardBg: string;
+            cardBorder: string;
+            shadow: string;
+        };
+    };
+    modern: {
+        name: string;
+        colors: {
+            primary: string;
+            primaryHover: string;
+            background: string;
+            border: string;
+            text: string;
+            textSecondary: string;
+            cardBg: string;
+            cardBorder: string;
+            shadow: string;
+        };
+    };
+    fresh: {
+        name: string;
+        colors: {
+            primary: string;
+            primaryHover: string;
+            background: string;
+            border: string;
+            text: string;
+            textSecondary: string;
+            cardBg: string;
+            cardBorder: string;
+            shadow: string;
+        };
+    };
+    dark: {
+        name: string;
+        colors: {
+            primary: string;
+            primaryHover: string;
+            background: string;
+            border: string;
+            text: string;
+            textSecondary: string;
+            cardBg: string;
+            cardBorder: string;
+            shadow: string;
+        };
+    };
+    ocean: {
+        name: string;
+        colors: {
+            primary: string;
+            primaryHover: string;
+            background: string;
+            border: string;
+            text: string;
+            textSecondary: string;
+            cardBg: string;
+            cardBorder: string;
+            shadow: string;
+        };
+    };
+};
+export type ThemeName = keyof typeof themes;
+export type CustomTheme = typeof themes[ThemeName];
 export interface ImageUploaderProps {
     images: File[];
     setImages: (images: File[]) => void;
+    mode?: 'add' | 'update';
+    defaultImages?: string[];
     multiple?: boolean;
     maxSize?: number;
     allowedTypes?: string[];
     maxImages?: number;
-    className?: string;
-    containerClassName?: string;
-    uploadText?: string;
-    dragText?: string;
-    theme?: 'light' | 'dark';
-    onThemeChange?: (theme: 'light' | 'dark') => void;
-    showThemeToggle?: boolean;
-    showImageCount?: boolean;
-    enableReorder?: boolean;
-    gridCols?: number;
-    cardClassName?: string;
-    onUploadComplete?: (urls: string[]) => void;
-    onUploadError?: (error: Error) => void;
-    autoUpload?: boolean;
     uploadConfig?: {
         provider: UploadProvider;
         config: ProviderConfig;
     };
+    autoUpload?: boolean;
+    onUploadComplete?: (urls: string[]) => void;
+    onUploadError?: (error: Error) => void;
+    theme?: ThemeName;
+    customTheme?: CustomTheme;
+    showThemeSelector?: boolean;
+    previewSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+    borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'full';
+    className?: string;
+    containerClassName?: string;
+    showImageCount?: boolean;
+    showFileSize?: boolean;
+    showFileName?: boolean;
 }
-export declare function ImageUploader({ images, setImages, multiple, maxSize, allowedTypes, maxImages, className, containerClassName, uploadText, dragText, theme: externalTheme, onThemeChange, showThemeToggle, showImageCount, enableReorder, gridCols, cardClassName, onUploadComplete, onUploadError, autoUpload, uploadConfig, }: ImageUploaderProps): import("react/jsx-runtime").JSX.Element;
+export declare function ImageUploader({ images, setImages, mode, defaultImages, multiple, maxSize, allowedTypes, maxImages, uploadConfig, autoUpload, onUploadComplete, onUploadError, theme, customTheme, showThemeSelector, previewSize, borderRadius, className, containerClassName, showImageCount, showFileSize, showFileName, }: ImageUploaderProps): import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=ImageUploader.d.ts.map

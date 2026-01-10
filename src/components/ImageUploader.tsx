@@ -1,36 +1,127 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, X, Image as ImageIcon, File, Moon, Sun, GripVertical } from 'lucide-react';
+import { Upload, Image as ImageIcon, Loader2, Trash2 } from 'lucide-react';
 import type { UploadProvider, ProviderConfig } from '../types';
 import { uploadImage } from '../providers';
 import { isImageFile, formatFileSize } from '../utils/validation';
 
+// Theme definitions - shadcn/ui inspired
+export const themes = {
+  nature: {
+    name: 'Nature',
+    colors: {
+      primary: '#16a34a',
+      primaryHover: '#15803d',
+      background: '#f0fdf4',
+      border: '#bbf7d0',
+      text: '#14532d',
+      textSecondary: '#166534',
+      cardBg: '#ffffff',
+      cardBorder: '#dcfce7',
+      shadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+    },
+  },
+  modern: {
+    name: 'Modern',
+    colors: {
+      primary: '#09090b',
+      primaryHover: '#18181b',
+      background: '#fafafa',
+      border: '#e4e4e7',
+      text: '#18181b',
+      textSecondary: '#71717a',
+      cardBg: '#ffffff',
+      cardBorder: '#e4e4e7',
+      shadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+    },
+  },
+  fresh: {
+    name: 'Fresh',
+    colors: {
+      primary: '#0284c7',
+      primaryHover: '#0369a1',
+      background: '#f0f9ff',
+      border: '#bae6fd',
+      text: '#0c4a6e',
+      textSecondary: '#075985',
+      cardBg: '#ffffff',
+      cardBorder: '#e0f2fe',
+      shadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+    },
+  },
+  dark: {
+    name: 'Dark',
+    colors: {
+      primary: '#3b82f6',
+      primaryHover: '#2563eb',
+      background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+      border: '#334155',
+      text: '#f8fafc',
+      textSecondary: '#94a3b8',
+      cardBg: '#1e293b',
+      cardBorder: '#334155',
+      shadow: '0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.3)',
+    },
+  },
+  ocean: {
+    name: 'Ocean',
+    colors: {
+      primary: '#06b6d4',
+      primaryHover: '#0891b2',
+      background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
+      border: '#7dd3fc',
+      text: '#f0f9ff',
+      textSecondary: '#bae6fd',
+      cardBg: '#0c4a6e',
+      cardBorder: '#0369a1',
+      shadow: '0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2)',
+    },
+  },
+};
+
+export type ThemeName = keyof typeof themes;
+export type CustomTheme = typeof themes[ThemeName];
+
 export interface ImageUploaderProps {
+  // Core props
   images: File[];
   setImages: (images: File[]) => void;
+
+  // Mode
+  mode?: 'add' | 'update';
+  defaultImages?: string[];
+
+  // File constraints
   multiple?: boolean;
   maxSize?: number;
   allowedTypes?: string[];
   maxImages?: number;
-  className?: string;
-  containerClassName?: string;
-  uploadText?: string;
-  dragText?: string;
-  theme?: 'light' | 'dark';
-  onThemeChange?: (theme: 'light' | 'dark') => void;
-  showThemeToggle?: boolean;
-  showImageCount?: boolean;
-  enableReorder?: boolean;
-  gridCols?: number;
-  cardClassName?: string;
-  onUploadComplete?: (urls: string[]) => void;
-  onUploadError?: (error: Error) => void;
-  autoUpload?: boolean;
+
+  // Upload configuration
   uploadConfig?: {
     provider: UploadProvider;
     config: ProviderConfig;
   };
+  autoUpload?: boolean;
+  onUploadComplete?: (urls: string[]) => void;
+  onUploadError?: (error: Error) => void;
+
+  // Theme & styling
+  theme?: ThemeName;
+  customTheme?: CustomTheme;
+  showThemeSelector?: boolean;
+
+  // Customization
+  previewSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'full';
+  className?: string;
+  containerClassName?: string;
+
+  // UI toggles
+  showImageCount?: boolean;
+  showFileSize?: boolean;
+  showFileName?: boolean;
 }
 
 interface FileWithProgress extends File {
@@ -40,45 +131,50 @@ interface FileWithProgress extends File {
   preview?: string;
 }
 
+const borderRadiusMap = {
+  none: '0',
+  sm: '0.25rem',
+  md: '0.375rem',
+  lg: '0.5rem',
+  full: '9999px',
+};
+
 export function ImageUploader({
   images,
   setImages,
+  mode = 'add',
+  defaultImages = [],
   multiple = true,
   maxSize = 50 * 1024 * 1024,
-  allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'],
+  allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'],
   maxImages = 20,
-  className = '',
-  containerClassName = 'max-w-5xl mx-auto',
-  uploadText = 'Click or drag to upload images',
-  dragText = 'Drop images here',
-  theme: externalTheme,
-  onThemeChange,
-  showThemeToggle = true,
-  showImageCount = true,
-  enableReorder = true,
-  gridCols = 4,
-  cardClassName = '',
+  uploadConfig,
+  autoUpload = false,
   onUploadComplete,
   onUploadError,
-  autoUpload = false,
-  uploadConfig,
+  theme = 'nature',
+  customTheme,
+  showThemeSelector = false,
+  previewSize = 'lg',
+  borderRadius = 'md',
+  className = '',
+  containerClassName = 'max-w-5xl mx-auto mt-10',
+  showImageCount = true,
+  showFileSize = true,
+  showFileName = true,
 }: ImageUploaderProps) {
-  const [internalTheme, setInternalTheme] = useState<'light' | 'dark'>('light');
+  const [selectedTheme, setSelectedTheme] = useState<ThemeName>(theme);
   const [isDragging, setIsDragging] = useState(false);
   const [fileStates, setFileStates] = useState<Map<string, FileWithProgress>>(new Map());
   const [uploading, setUploading] = useState(false);
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [removedDefaults, setRemovedDefaults] = useState<number[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragCounter = useRef(0);
 
-  const theme = externalTheme || internalTheme;
-  const isDark = theme === 'dark';
-
-  const handleThemeToggle = () => {
-    const newTheme = isDark ? 'light' : 'dark';
-    setInternalTheme(newTheme);
-    onThemeChange?.(newTheme);
-  };
+  const currentTheme = customTheme || themes[selectedTheme];
+  const t = currentTheme.colors;
+  const radius = borderRadiusMap[borderRadius];
 
   // Generate previews
   useEffect(() => {
@@ -104,9 +200,43 @@ export function ImageUploader({
     }
   }, [images]);
 
+  // Validate upload config
+  const validateUploadConfig = useCallback((): string | null => {
+    if (!uploadConfig) return null;
+
+    if (uploadConfig.provider === 'imgbb') {
+      if (!uploadConfig.config.apiKey) {
+        return 'ImgBB API key is missing. Please provide a valid API key in the uploadConfig.';
+      }
+      if (uploadConfig.config.apiKey.trim() === '') {
+        return 'ImgBB API key cannot be empty.';
+      }
+    }
+
+    if (uploadConfig.provider === 'cloudinary') {
+      if (!uploadConfig.config.cloudName) {
+        return 'Cloudinary cloud name is missing. Please provide a valid cloud name in the uploadConfig.';
+      }
+      if (uploadConfig.config.cloudName.trim() === '') {
+        return 'Cloudinary cloud name cannot be empty.';
+      }
+    }
+
+    return null;
+  }, [uploadConfig]);
+
   const handleAutoUpload = async () => {
     if (!uploadConfig) return;
 
+    // Validate config before upload
+    const validationError = validateUploadConfig();
+    if (validationError) {
+      setError(validationError);
+      onUploadError?.(new Error(validationError));
+      return;
+    }
+
+    setError(null);
     setUploading(true);
     try {
       const results = await Promise.all(
@@ -147,8 +277,9 @@ export function ImageUploader({
       const urls = results.map((r) => r.url);
       onUploadComplete?.(urls);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Upload failed');
-      onUploadError?.(error);
+      const errorMessage = err instanceof Error ? err.message : 'Upload failed';
+      setError(errorMessage);
+      onUploadError?.(err instanceof Error ? err : new Error(errorMessage));
     } finally {
       setUploading(false);
     }
@@ -235,33 +366,8 @@ export function ImageUploader({
     setImages(images.filter((_, i) => i !== index));
   };
 
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    if (!enableReorder) return;
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOverItem = (e: React.DragEvent, index: number) => {
-    if (!enableReorder || draggedIndex === null || draggedIndex === index) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDropItem = (e: React.DragEvent, index: number) => {
-    if (!enableReorder || draggedIndex === null || draggedIndex === index) return;
-    e.preventDefault();
-
-    const newImages = [...images];
-    const draggedItem = newImages[draggedIndex];
-    newImages.splice(draggedIndex, 1);
-    newImages.splice(index, 0, draggedItem);
-
-    setImages(newImages);
-    setDraggedIndex(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
+  const removeDefaultImage = (index: number) => {
+    setRemovedDefaults((prev) => [...prev, index]);
   };
 
   const getFileState = (file: File): FileWithProgress => {
@@ -269,55 +375,101 @@ export function ImageUploader({
     return fileStates.get(key) || { ...file, progress: 0, status: 'pending' };
   };
 
-  const gridColsClass = {
-    2: 'grid-cols-2',
-    3: 'grid-cols-3',
-    4: 'grid-cols-4',
-    5: 'grid-cols-5',
-    6: 'grid-cols-6',
-  }[gridCols] || 'grid-cols-4';
-
   return (
     <div className={`image-uploader ${containerClassName} ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          Upload Images
-        </h2>
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight" style={{ color: t.text }}>
+            {mode === 'update' ? 'Update' : 'Upload'} Images
+          </h2>
+          <p className="text-sm" style={{ color: t.textSecondary }}>
+            {multiple ? 'Drag and drop or click to upload' : 'Select an image to upload'}
+          </p>
+        </div>
+
         {showImageCount && (
-          <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            {images.length} {maxImages ? `/ ${maxImages}` : ''} images
-          </span>
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border"
+            style={{
+              backgroundColor: t.cardBg,
+              borderColor: t.cardBorder,
+              color: t.text,
+            }}
+          >
+            <span>{images.length}</span>
+            {maxImages && <span className="text-muted" style={{ color: t.textSecondary }}>/ {maxImages}</span>}
+          </div>
         )}
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-4 rounded-md border flex items-start gap-3" style={{ backgroundColor: '#fef2f2', borderColor: '#fecaca' }}>
+          <div className="flex-shrink-0">
+            <svg className="w-5 h-5" style={{ color: '#dc2626' }} fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium" style={{ color: '#991b1b' }}>Upload Error</p>
+            <p className="text-sm mt-1" style={{ color: '#b91c1c' }}>{error}</p>
+          </div>
+          <button
+            onClick={() => setError(null)}
+            className="flex-shrink-0 inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2"
+            style={{ color: '#991b1b' }}
+            aria-label="Dismiss error"
+          >
+            <span className="sr-only">Dismiss</span>
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Theme Selector */}
+      {showThemeSelector && (
+        <div className="mb-6 inline-flex gap-1 p-1 rounded-lg border" style={{ backgroundColor: t.background, borderColor: t.cardBorder }}>
+          {(Object.keys(themes) as ThemeName[]).map((key) => (
+            <button
+              key={key}
+              onClick={() => setSelectedTheme(key)}
+              className="px-3 py-1.5 text-sm font-medium rounded-md transition-colors"
+              style={{
+                backgroundColor: selectedTheme === key ? t.cardBg : 'transparent',
+                color: selectedTheme === key ? t.text : t.textSecondary,
+              }}
+            >
+              {themes[key].name}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Upload Area */}
       <div
-        className={`relative rounded-2xl border-2 border-dashed transition-all duration-300 ${
-          isDragging
-            ? 'border-blue-500 bg-blue-50 scale-[1.02]'
-            : isDark
-            ? 'border-gray-600 bg-gray-800/50 hover:border-gray-500'
-            : 'border-gray-300 bg-gray-50 hover:border-gray-400'
-        }`}
+        role="button"
+        tabIndex={0}
+        aria-label="Upload images"
+        className="relative group cursor-pointer overflow-hidden transition-all duration-200"
         style={{
-          boxShadow: isDark
-            ? '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)'
-            : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          borderRadius: radius,
+          border: `2px dashed ${isDragging ? t.primary : t.cardBorder}`,
+          backgroundColor: t.background,
         }}
         onClick={() => fileInputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            fileInputRef.current?.click();
-          }
-        }}
-        onFocus={(e) => e.currentTarget.classList.add('ring-2', 'ring-blue-500')}
-        onBlur={(e) => e.currentTarget.classList.remove('ring-2', 'ring-blue-500')}
       >
         <input
           ref={fileInputRef}
@@ -326,88 +478,91 @@ export function ImageUploader({
           multiple={multiple}
           onChange={handleChange}
           className="absolute inset-0 opacity-0 cursor-pointer"
-          style={{ zIndex: 10 }}
+          style={{
+            zIndex: 10,
+            width: '0.1px',
+            height: '0.1px',
+            padding: 0,
+            margin: 0,
+            overflow: 'hidden',
+            clip: 'rect(0, 0, 0, 0)',
+            whiteSpace: 'nowrap',
+          }}
+          tabIndex={-1}
         />
 
-        <div className="flex flex-col items-center justify-center p-12">
+        <div className="flex flex-col items-center justify-center p-8">
           <div
-            className={`relative mb-4 transition-transform duration-300 ${
-              isDragging ? 'scale-110' : 'scale-100'
-            }`}
+            className="mb-4 flex items-center justify-center transition-transform duration-200"
+            style={{ color: isDragging ? t.primary : t.textSecondary }}
           >
             <div
-              className={`w-20 h-20 rounded-full flex items-center justify-center ${
-                isDark ? 'bg-gray-700' : 'bg-white'
-              }`}
+              className="flex items-center justify-center rounded-full"
               style={{
-                boxShadow: isDark
-                  ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
-                  : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                width: previewSize === '2xl' ? '96px' : previewSize === 'xl' ? '80px' : previewSize === 'lg' ? '64px' : previewSize === 'md' ? '56px' : previewSize === 'sm' ? '48px' : '40px',
+                height: previewSize === '2xl' ? '96px' : previewSize === 'xl' ? '80px' : previewSize === 'lg' ? '64px' : previewSize === 'md' ? '56px' : previewSize === 'sm' ? '48px' : '40px',
+                backgroundColor: t.cardBg,
+                border: `1px solid ${t.cardBorder}`,
               }}
             >
-              <ImageIcon
-                size={40}
-                className={isDark ? 'text-gray-400' : 'text-gray-500'}
-              />
-            </div>
-            <div
-              className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-                isDragging ? 'scale-125' : 'scale-100'
-              } ${isDark ? 'bg-blue-600' : 'bg-blue-500'}`}
-            >
-              <Upload size={20} className="text-white" />
+              <ImageIcon size={24} />
             </div>
           </div>
 
-          <p
-            className={`text-lg font-semibold mb-2 transition-colors ${
-              isDark ? 'text-white' : 'text-gray-900'
-            }`}
-          >
-            {isDragging ? dragText : uploadText}
-          </p>
-
-          <p
-            className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
-          >
-            Maximum file size {formatFileSize(maxSize)}
-          </p>
-
-          {maxImages && (
-            <p className={`text-xs mt-2 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-              Up to {maxImages} images
+          <div className="text-center space-y-1">
+            <p className="text-sm font-medium" style={{ color: t.text }}>
+              {isDragging ? 'Drop here' : 'Click or drop to upload'}
             </p>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Theme Toggle */}
-      {showThemeToggle && !externalTheme && (
-        <div className="flex justify-end mt-4">
-          <button
-            onClick={handleThemeToggle}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-              isDark
-                ? 'bg-gray-800 hover:bg-gray-700 text-gray-200'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-            }`}
-          >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            <span className="text-sm font-medium">
-              {isDark ? 'Light' : 'Dark'} Mode
-            </span>
-          </button>
-        </div>
-      )}
+      {/* Images Grid */}
+      {(images.length > 0 || defaultImages.length > 0) && (
+        <div className="mt-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {/* Default Images (Update Mode) */}
+            {mode === 'update' &&
+              defaultImages.map(
+                (url, index) =>
+                  !removedDefaults.includes(index) && (
+                    <div
+                      key={`default-${index}`}
+                      className="relative group aspect-square"
+                      style={{ animation: 'fadeIn 0.2s ease-out' }}
+                    >
+                      <div
+                        className="relative w-full h-full overflow-hidden border transition-all duration-200 hover:shadow-md"
+                        style={{
+                          borderRadius: radius,
+                          borderColor: t.cardBorder,
+                          backgroundColor: t.cardBg,
+                        }}
+                      >
+                        <img
+                          src={url}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
 
-      {/* Image Grid */}
-      {images.length > 0 && (
-        <div className="mt-8">
-          <div
-            className={`grid gap-4 ${gridColsClass} ${
-              isDark ? 'text-white' : 'text-gray-900'
-            }`}
-          >
+                        {/* Remove Button */}
+                        <button
+                          onClick={() => removeDefaultImage(index)}
+                          className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full transition-opacity duration-200 hover:opacity-80"
+                          style={{
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            backdropFilter: 'blur(4px)',
+                          }}
+                          aria-label="Remove image"
+                        >
+                          <Trash2 size={14} className="text-white" />
+                        </button>
+                      </div>
+                    </div>
+                  )
+              )}
+
+            {/* Uploaded Images */}
             {images.map((file, index) => {
               const state = getFileState(file);
               const isUploading = state.status === 'uploading';
@@ -416,131 +571,84 @@ export function ImageUploader({
               return (
                 <div
                   key={`${file.name}-${file.size}`}
-                  draggable={enableReorder}
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={(e) => handleDragOverItem(e, index)}
-                  onDrop={(e) => handleDropItem(e, index)}
-                  onDragEnd={handleDragEnd}
-                  className={`group relative ${cardClassName} ${
-                    draggedIndex === index ? 'opacity-50' : ''
-                  }`}
+                  className="relative group aspect-square"
+                  style={{ animation: 'fadeIn 0.2s ease-out', animationDelay: `${index * 30}ms` }}
                 >
                   <div
-                    className={`relative overflow-hidden rounded-xl transition-all duration-300 ${
-                      isDark
-                        ? 'bg-gray-800 hover:bg-gray-750'
-                        : 'bg-white hover:bg-gray-50'
-                    }`}
+                    className="relative w-full h-full overflow-hidden border transition-all duration-200 hover:shadow-md"
                     style={{
-                      boxShadow: isDark
-                        ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
-                        : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                      borderRadius: radius,
+                      borderColor: t.cardBorder,
+                      backgroundColor: t.cardBg,
                     }}
                   >
-                    {/* Reorder Handle */}
-                    {enableReorder && (
-                      <div
-                        className={`absolute top-2 left-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-20 ${
-                          isDark ? 'bg-gray-700' : 'bg-white'
-                        }`}
-                        style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
-                      >
-                        <GripVertical size={16} className={isDark ? 'text-gray-400' : 'text-gray-500'} />
+                    {state.preview ? (
+                      <img
+                        src={state.preview}
+                        alt={file.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: t.border }}>
+                        <ImageIcon size={32} style={{ color: t.primary }} />
                       </div>
                     )}
 
                     {/* Remove Button */}
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeFile(index);
+                      onClick={() => removeFile(index)}
+                      className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full transition-opacity duration-200 hover:opacity-80"
+                      style={{
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        backdropFilter: 'blur(4px)',
                       }}
-                      className="absolute top-2 right-2 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all z-20 hover:scale-110 bg-red-500 hover:bg-red-600 text-white"
-                      style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
+                      aria-label="Remove image"
                     >
-                      <X size={16} />
+                      <Trash2 size={14} className="text-white" />
                     </button>
 
-                    {/* Preview */}
-                    <div className="relative aspect-square">
-                      {state.preview ? (
-                        <img
-                          src={state.preview}
-                          alt={file.name}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      ) : (
+                    {/* Progress Overlay */}
+                    {isUploading && (
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                        <div className="text-center">
+                          <Loader2 size={24} className="animate-spin text-white mx-auto mb-2" />
+                          <p className="text-white text-xs font-medium">{state.progress}%</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Done Indicator */}
+                    {isDone && (
+                      <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center">
                         <div
-                          className={`w-full h-full flex items-center justify-center ${
-                            isDark ? 'bg-gray-700' : 'bg-gray-100'
-                          }`}
+                          className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center"
+                          style={{
+                            boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)',
+                          }}
                         >
-                          <File
-                            size={48}
-                            className={isDark ? 'text-gray-500' : 'text-gray-400'}
-                          />
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
                         </div>
-                      )}
-
-                      {/* Progress Overlay */}
-                      {(isUploading || isDone) && (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                          <div className="text-center">
-                            {isUploading ? (
-                              <>
-                                <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                                <p className="text-white font-semibold">{state.progress}%</p>
-                              </>
-                            ) : (
-                              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
-                                <svg
-                                  className="w-8 h-8 text-white"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={3}
-                                    d="M5 13l4 4L19 7"
-                                  />
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* File Info */}
-                    <div className="p-3">
-                      <p
-                        className={`text-sm font-medium truncate mb-1 ${
-                          isDark ? 'text-white' : 'text-gray-900'
-                        }`}
-                      >
-                        {file.name}
-                      </p>
-                      <p
-                        className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
-                      >
-                        {formatFileSize(file.size)}
-                      </p>
-
-                      {/* Progress Bar (Thumbnail) */}
-                      {isUploading && (
-                        <div className="mt-2">
-                          <div className="w-full bg-gray-200 rounded-full h-1">
-                            <div
-                              className="bg-blue-500 h-1 rounded-full transition-all duration-300"
-                              style={{ width: `${state.progress}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
+
+                  {/* File Info */}
+                  {(showFileName || showFileSize) && (
+                    <div className="mt-2 space-y-0.5">
+                      {showFileName && (
+                        <p className="text-xs font-medium truncate" style={{ color: t.text }}>
+                          {file.name}
+                        </p>
+                      )}
+                      {showFileSize && (
+                        <p className="text-xs" style={{ color: t.textSecondary }}>
+                          {formatFileSize(file.size)}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -549,37 +657,57 @@ export function ImageUploader({
       )}
 
       {/* Action Buttons */}
-      {images.length > 0 && !autoUpload && (
+      {images.length > 0 && !autoUpload && uploadConfig && (
         <div className="mt-6 flex items-center justify-end gap-3">
           <button
-            onClick={() => setImages([])}
-            className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-all ${
-              isDark
-                ? 'bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700'
-                : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-300'
-            }`}
+            onClick={() => {
+              setImages([]);
+              setRemovedDefaults([]);
+            }}
+            className="px-4 py-2 text-sm font-medium rounded-md border transition-colors duration-200 hover:bg-opacity-80"
+            style={{
+              backgroundColor: t.cardBg,
+              color: t.text,
+              borderColor: t.cardBorder,
+            }}
           >
-            Clear All
+            Clear
           </button>
           <button
             onClick={handleAutoUpload}
             disabled={uploading}
-            className="px-6 py-2.5 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-lg hover:scale-105 flex items-center gap-2"
+            className="px-4 py-2 text-sm font-medium rounded-md text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+            style={{
+              backgroundColor: t.primary,
+            }}
           >
             {uploading ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <Loader2 size={16} className="animate-spin" />
                 Uploading...
               </>
             ) : (
               <>
                 <Upload size={16} />
-                Upload {images.length} {images.length === 1 ? 'Image' : 'Images'}
+                Upload {images.length} {images.length === 1 ? 'image' : 'images'}
               </>
             )}
           </button>
         </div>
       )}
+
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(4px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }

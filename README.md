@@ -2,13 +2,13 @@
 
 <div align="center">
 
-A modern, fancy React image upload component with responsive grid layout, drag-and-drop reordering, and beautiful animations.
+A modern, production-ready React image upload component with shadcn/ui-inspired design, beautiful themes, and smooth animations.
 
 [![npm version](https://badge.fury.io/js/ultra-image-uploader.svg)](https://www.npmjs.com/package/ultra-image-uploader)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
 
-**Modern UI** • **Dark/Light Themes** • **Grid Layout** • **Drag Reorder**
+**shadcn/ui Design** • **3 Themes** • **ImgBB & Cloudinary** • **Customizable**
 
 </div>
 
@@ -16,18 +16,19 @@ A modern, fancy React image upload component with responsive grid layout, drag-a
 
 ## Features
 
-- **Modern UI** - Beautiful card-based design with shadows and rounded corners
-- **Responsive Grid** - Adaptive grid layout (2-6 columns) for all screen sizes
-- **Drag & Drop** - Upload files by dragging or clicking
-- **Live Previews** - Instant image thumbnails with metadata
-- **Drag Reorder** - Rearrange images by dragging
-- **Progress Tracking** - Real-time upload progress with animations
-- **Theme Support** - Built-in light/dark theme toggle
-- **Smooth Animations** - Hover effects, fade transitions, scale animations
-- **Keyboard Accessible** - Full keyboard navigation support
-- **File Validation** - Size and type validation
+- **Modern UI** - Clean, minimal shadcn/ui-inspired design
+- **5 Built-in Themes** - Nature, Modern, Fresh, Dark (gradient), Ocean (blue gradient)
+- **Drag & Drop** - Beautiful drag-and-drop with smooth animations
+- **Live Previews** - Responsive grid with image thumbnails
+- **Progress Tracking** - Real-time upload progress with visual feedback
+- **Remove Images** - Easy removal with trash icon in both create and update modes
+- **Error Handling** - Built-in API key validation and error display
+- **Custom Themes** - Create your own theme with custom colors
 - **Multiple Providers** - ImgBB & Cloudinary support
+- **File Validation** - Size, type, and count validation
+- **Accessible** - Keyboard navigation and ARIA support
 - **Auto Import** - Works with VS Code, WebStorm, and all editors
+- **Customization API** - Border radius, preview size (xs to 2xl), show/hide elements
 
 ## Installation
 
@@ -59,7 +60,6 @@ function App() {
       images={images}
       setImages={setImages}
       multiple
-      gridCols={4}
     />
   );
 }
@@ -69,91 +69,44 @@ function App() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
+| **Core** |
 | `images` | `File[]` | **Required** | Selected image files |
 | `setImages` | `(files: File[]) => void` | **Required** | Update images state |
+| **Mode** |
+| `mode` | `'add' \| 'update'` | `'add'` | Upload mode |
+| `defaultImages` | `string[]` | `[]` | Default images (update mode) |
+| **File Constraints** |
 | `multiple` | `boolean` | `true` | Allow multiple files |
 | `maxSize` | `number` | `52428800` | Max file size (50MB) |
 | `allowedTypes` | `string[]` | Image types | Allowed MIME types |
 | `maxImages` | `number` | `20` | Maximum images allowed |
-| `theme` | `'light' \| 'dark'` | `undefined` | Theme (uses internal if not set) |
-| `onThemeChange` | `(theme) => void` | `undefined` | Theme change callback |
-| `showThemeToggle` | `boolean` | `true` | Show theme toggle button |
-| `showImageCount` | `boolean` | `true` | Show image count header |
-| `enableReorder` | `boolean` | `true` | Enable drag reordering |
-| `gridCols` | `number` | `4` | Grid columns (2-6) |
-| `cardClassName` | `string` | `''` | Custom card class |
-| `containerClassName` | `string` | `'max-w-5xl mx-auto'` | Container styling |
-| `uploadText` | `string` | `'Click or drag...'` | Upload area text |
-| `dragText` | `string` | `'Drop images here'` | Drag over text |
-| `autoUpload` | `boolean` | `false` | Auto-upload on selection |
+| **Upload** |
 | `uploadConfig` | `{ provider, config }` | `undefined` | Upload configuration |
+| `autoUpload` | `boolean` | `false` | Auto-upload on selection |
 | `onUploadComplete` | `(urls: string[]) => void` | `undefined` | Success callback |
 | `onUploadError` | `(error: Error) => void` | `undefined` | Error callback |
+| **Theme & Styling** |
+| `theme` | `'nature' \| 'modern' \| 'fresh' \| 'dark' \| 'ocean'` | `'nature'` | Built-in theme |
+| `customTheme` | `Theme` | `undefined` | Custom theme object |
+| `showThemeSelector` | `boolean` | `false` | Show theme selector |
+| `borderRadius` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'` | `'md'` | Border radius |
+| `previewSize` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'lg'` | Upload icon size |
+| `className` | `string` | `''` | Custom class name |
+| `containerClassName` | `string` | `'max-w-5xl mx-auto mt-10'` | Container styling |
+| **UI Toggles** |
+| `showImageCount` | `boolean` | `true` | Show image count badge |
+| `showFileName` | `boolean` | `true` | Show file name under preview |
+| `showFileSize` | `boolean` | `true` | Show file size under preview |
 
 ## Examples
 
-### Basic Grid Layout
+### Basic Usage
 
 ```tsx
-<ImageUploader
-  images={images}
-  setImages={setImages}
-  multiple
-  gridCols={4}
-/>
-```
+import { ImageUploader } from "ultra-image-uploader";
+import { useState } from "react";
 
-### Dark Theme
-
-```tsx
-function DarkExample() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-  const [images, setImages] = useState<File[]>([]);
-
-  return (
-    <div className={theme === 'dark' ? 'dark' : ''}>
-      <ImageUploader
-        images={images}
-        setImages={setImages}
-        theme={theme}
-        onThemeChange={setTheme}
-        multiple
-        gridCols={3}
-      />
-    </div>
-  );
-}
-```
-
-### Custom Grid & Styling
-
-```tsx
-<ImageUploader
-  images={images}
-  setImages={setImages}
-  gridCols={3}
-  maxImages={10}
-  maxSize={10 * 1024 * 1024}
-  containerClassName="max-w-4xl mx-auto"
-  cardClassName="border-2"
-/>
-```
-
-### Without Reordering
-
-```tsx
-<ImageUploader
-  images={images}
-  setImages={setImages}
-  enableReorder={false}
-  gridCols={5}
-/>
-```
-
-### With Upload (ImgBB)
-
-```tsx
-function UploadExample() {
+function BasicExample() {
   const [images, setImages] = useState<File[]>([]);
 
   return (
@@ -161,134 +114,350 @@ function UploadExample() {
       images={images}
       setImages={setImages}
       multiple
-      gridCols={4}
+    />
+  );
+}
+```
+
+### Different Themes
+
+```tsx
+// Nature theme (green) - Default
+<ImageUploader theme="nature" images={images} setImages={setImages} />
+
+// Modern theme (neutral/monochrome)
+<ImageUploader theme="modern" images={images} setImages={setImages} />
+
+// Fresh theme (blue)
+<ImageUploader theme="fresh" images={images} setImages={setImages} />
+
+// Dark theme (dark gradient with blue accent)
+<ImageUploader theme="dark" images={images} setImages={setImages} />
+
+// Ocean theme (blue gradient)
+<ImageUploader theme="ocean" images={images} setImages={setImages} />
+```
+
+### Upload with ImgBB
+
+```tsx
+import { ImageUploader } from "ultra-image-uploader";
+
+function ImgBBUpload() {
+  const [images, setImages] = useState<File[]>([]);
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      multiple
+      theme="nature"
       uploadConfig={{
         provider: 'imgbb',
-        config: { apiKey: process.env.IMGBB_API_KEY }
+        config: { apiKey: process.env.IMGBB_API_KEY! }
       }}
       onUploadComplete={(urls) => {
-        console.log('Uploaded:', urls);
+        console.log('Uploaded URLs:', urls);
+      }}
+      onUploadError={(error) => {
+        console.error('Upload failed:', error.message);
       }}
     />
   );
 }
 ```
 
-### Responsive Grid
+### Upload with Cloudinary
 
 ```tsx
-// 2 columns on mobile, 4 on desktop
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-  <ImageUploader images={images} setImages={setImages} gridCols={1} />
-</div>
+function CloudinaryUpload() {
+  const [images, setImages] = useState<File[]>([]);
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      multiple
+      theme="fresh"
+      uploadConfig={{
+        provider: 'cloudinary',
+        config: {
+          cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!,
+          uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
+        }
+      }}
+      onUploadComplete={(urls) => {
+        console.log('Uploaded URLs:', urls);
+      }}
+    />
+  );
+}
 ```
 
-## Theme Support
-
-The component includes built-in light and dark themes:
+### Auto Upload
 
 ```tsx
-// Controlled theme
-<ImageUploader
-  images={images}
-  setImages={setImages}
-  theme="dark"
-  showThemeToggle={false}
-/>
+function AutoUploadExample() {
+  const [images, setImages] = useState<File[]>([]);
 
-// Uncontrolled theme (with toggle)
-<ImageUploader
-  images={images}
-  setImages={setImages}
-  showThemeToggle={true}
-/>
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      autoUpload
+      uploadConfig={{
+        provider: 'imgbb',
+        config: { apiKey: process.env.IMGBB_API_KEY! }
+      }}
+      onUploadComplete={(urls) => {
+        // Automatically upload when images are selected
+        saveUrlsToDatabase(urls);
+      }}
+    />
+  );
+}
 ```
 
-## Animations
-
-The component includes smooth animations:
-- Scale effect on drag over
-- Fade-in/out for previews
-- Hover scale on image cards
-- Smooth progress bar transitions
-- Button hover effects
-
-## Accessibility
-
-- Keyboard accessible (Enter/Space to upload)
-- Focus indicators on drag area
-- ARIA-compatible markup
-- Screen reader friendly
-
-## Responsive Design
-
-The grid layout adapts to screen sizes:
-- Default: `max-w-5xl mx-auto` container
-- Configurable grid columns (2-6)
-- Works on mobile, tablet, and desktop
-
-## Upload Functions
+### Update Mode (Existing Images)
 
 ```tsx
-import {
-  uploadImage,
-  uploadImages,
-  uploadImagesToImageBB,
-  uploadImagesToCloudinary
-} from "ultra-image-uploader";
+function UpdateExample() {
+  const [newImages, setNewImages] = useState<File[]>([]);
 
-// Upload with progress
-const result = await uploadImage(file, 'imgbb', { apiKey }, {
-  onProgress: (p) => console.log(p.percentage)
-});
+  const existingImages = [
+    'https://example.com/image1.jpg',
+    'https://example.com/image2.jpg'
+  ];
 
-// Multiple uploads
-const results = await uploadImages(files, 'cloudinary', {
-  cloudName: 'your-cloud'
-});
+  return (
+    <ImageUploader
+      images={newImages}
+      setImages={setNewImages}
+      mode="update"
+      defaultImages={existingImages}
+      theme="modern"
+      multiple
+    />
+  );
+}
 ```
 
-## API Configuration
+### Custom Theme
 
-### ImgBB
-1. Get API key from [imgbb.com/settings/api](https://imgbb.com/settings/api)
-2. Use `{ provider: 'imgbb', config: { apiKey } }`
+```tsx
+import { ImageUploader, type CustomTheme } from "ultra-image-uploader";
 
-### Cloudinary
-1. Sign up at [cloudinary.com](https://cloudinary.com)
-2. Get cloud name and create upload preset
-3. Use `{ provider: 'cloudinary', config: { cloudName, uploadPreset } }`
+function CustomThemeExample() {
+  const [images, setImages] = useState<File[]>([]);
+
+  const customTheme: CustomTheme = {
+    name: 'MyBrand',
+    colors: {
+      primary: '#FF6B35',
+      primaryHover: '#E55A2B',
+      background: '#FFF5F0',
+      border: '#FFE5D9',
+      text: '#2D3142',
+      textSecondary: '#4F5D75',
+      cardBg: '#FFFFFF',
+      cardBorder: '#FFE5D9',
+      shadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+    },
+  };
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      customTheme={customTheme}
+      showThemeSelector={false}
+    />
+  );
+}
+```
+
+### Customization Options
+
+```tsx
+function CustomizedExample() {
+  const [images, setImages] = useState<File[]>([]);
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      // Border radius
+      borderRadius="lg"
+      // Preview size (affects upload icon)
+      previewSize="lg"
+      // Container width
+      containerClassName="max-w-3xl mx-auto mt-8"
+      // Show/hide elements
+      showImageCount={true}
+      showFileName={true}
+      showFileSize={true}
+      // Constraints
+      multiple={true}
+      maxImages={10}
+      maxSize={10 * 1024 * 1024} // 10MB
+      // Theme
+      theme="fresh"
+    />
+  );
+}
+```
+
+### Single Image Upload
+
+```tsx
+function SingleImageExample() {
+  const [avatar, setAvatar] = useState<File[]>([]);
+
+  return (
+    <ImageUploader
+      images={avatar}
+      setImages={setAvatar}
+      multiple={false}
+      maxImages={1}
+      theme="modern"
+      showImageCount={false}
+      showFileName={false}
+      showFileSize={false}
+    />
+  );
+}
+```
+
+### Product Gallery
+
+```tsx
+function ProductGallery() {
+  const [productImages, setProductImages] = useState<File[]>([]);
+
+  const handleUploadComplete = async (urls: string[]) => {
+    // Save to database
+    await fetch('/api/products/images', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ images: urls }),
+    });
+  };
+
+  return (
+    <ImageUploader
+      images={productImages}
+      setImages={setProductImages}
+      multiple={true}
+      maxImages={8}
+      maxSize={5 * 1024 * 1024} // 5MB
+      theme="nature"
+      borderRadius="lg"
+      uploadConfig={{
+        provider: 'cloudinary',
+        config: {
+          cloudName: process.env.CLOUDINARY_CLOUD_NAME!,
+          uploadPreset: 'products'
+        }
+      }}
+      onUploadComplete={handleUploadComplete}
+    />
+  );
+}
+```
+
+## Built-in Themes
+
+### Nature (Green)
+- Soft greens with organic feel
+- Primary: `#16a34a`
+- Background: `#f0fdf4`
+- Perfect for: Nature, health, eco-friendly apps
+
+### Modern (Neutral)
+- Clean monochrome design
+- Primary: `#09090b`
+- Background: `#fafafa`
+- Perfect for: Professional apps, portfolios, dashboards
+
+### Fresh (Blue)
+- Light blue airy design
+- Primary: `#0284c7`
+- Background: `#f0f9ff`
+- Perfect for: Social apps, SaaS, modern web apps
+
+### Dark (Dark Gradient)
+- Dark gradient with blue accent
+- Primary: `#3b82f6`
+- Background: `linear-gradient(135deg, #1e293b 0%, #0f172a 100%)`
+- Perfect for: Dark mode apps, modern interfaces
+
+### Ocean (Blue Gradient)
+- Beautiful blue to purple gradient
+- Primary: `#06b6d4`
+- Background: `linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)`
+- Perfect for: Creative apps, vibrant interfaces
 
 ## Customization
 
-### Card Styling
+### Border Radius Options
+
+```tsx
+borderRadius="none"   // 0
+borderRadius="sm"     // 0.25rem
+borderRadius="md"     // 0.375rem (default)
+borderRadius="lg"     // 0.5rem
+borderRadius="full"   // 9999px (circular)
+```
+
+### Preview Size Options
+
+```tsx
+previewSize="xs"   // Extra small (40px)
+previewSize="sm"   // Small (48px)
+previewSize="md"   // Medium (56px)
+previewSize="lg"   // Large (64px) - default
+previewSize="xl"   // Extra large (80px)
+previewSize="2xl"  // Double extra large (96px)
+```
+
+### Show/Hide Elements
 
 ```tsx
 <ImageUploader
-  images={images}
-  setImages={setImages}
-  cardClassName="border-2 border-purple-500"
+  showImageCount={false}    // Hide image count badge
+  showFileName={false}      // Hide file names
+  showFileSize={false}      // Hide file sizes
 />
 ```
 
-### Container Size
+## Upload Providers
+
+### ImgBB
+
+1. Get API key from [imgbb.com/settings/api](https://imgbb.com/settings/api)
+2. Configure:
 
 ```tsx
-<ImageUploader
-  images={images}
-  setImages={setImages}
-  containerClassName="max-w-7xl mx-auto"
-/>
+uploadConfig={{
+  provider: 'imgbb',
+  config: { apiKey: 'your-api-key' }
+}}
 ```
 
-### Grid Columns
+### Cloudinary
+
+1. Sign up at [cloudinary.com](https://cloudinary.com)
+2. Get cloud name and create upload preset
+3. Configure:
 
 ```tsx
-// 2 columns
-<ImageUploader gridCols={2} />
-
-// 6 columns
-<ImageUploader gridCols={6} />
+uploadConfig={{
+  provider: 'cloudinary',
+  config: {
+    cloudName: 'your-cloud-name',
+    uploadPreset: 'your-upload-preset'
+  }
+}}
 ```
 
 ## TypeScript
@@ -296,29 +465,101 @@ const results = await uploadImages(files, 'cloudinary', {
 Full TypeScript support:
 
 ```tsx
-import type { ImageUploaderProps } from "ultra-image-uploader";
+import type { ImageUploaderProps, ThemeName, CustomTheme } from "ultra-image-uploader";
 ```
+
+## Animations
+
+The component includes smooth, performance-friendly animations:
+- Drag-over state with border color change
+- Fade-in for image previews
+- Hover effects with shadow and scale
+- Progress overlay with backdrop blur
+- Done indicator with checkmark
+- All transitions use CSS transforms for 60fps performance
+
+## Accessibility
+
+- Keyboard accessible (Tab to focus, Enter/Space to upload)
+- Focus visible on drag area
+- ARIA-compatible markup
+- Screen reader friendly
+- Semantic HTML structure
+
+## Responsive Design
+
+The grid layout adapts to screen sizes:
+- Mobile (2 columns): 320px+
+- Tablet (3 columns): 640px+
+- Desktop (4 columns): 768px+
+- Wide (5 columns): 1024px+
+- Default container: `max-w-5xl mx-auto mt-10`
 
 ## Browser Support
 
 - Chrome/Edge (latest)
 - Firefox (latest)
 - Safari (latest)
-- Mobile browsers
+- Mobile browsers (iOS Safari, Chrome Mobile)
+
+## Error Handling
+
+The component includes built-in API key validation and displays errors inline:
+
+### API Key Validation
+
+If your API key is missing or invalid, the component will automatically display an error message:
+
+**ImgBB Errors:**
+- "ImgBB API key is missing. Please provide a valid API key in the uploadConfig."
+- "ImgBB API key cannot be empty."
+
+**Cloudinary Errors:**
+- "Cloudinary cloud name is missing. Please provide a valid cloud name in the uploadConfig."
+- "Cloudinary cloud name cannot be empty."
+
+### Error Display
+
+Errors appear in a dismissible alert box below the header with:
+- Red error icon
+- Clear error message
+- Dismiss button to clear the error
+
+### Handling Upload Errors
+
+You can also handle errors programmatically using the `onUploadError` callback:
+
+```tsx
+<ImageUploader
+  images={images}
+  setImages={setImages}
+  uploadConfig={{
+    provider: 'imgbb',
+    config: { apiKey: process.env.IMGBB_API_KEY! }
+  }}
+  onUploadError={(error) => {
+    console.error('Upload failed:', error);
+    // Show custom notification
+    toast.error(error.message);
+  }}
+/>
+```
 
 ## Troubleshooting
 
 ### Auto imports not working
-- Restart TypeScript server in your editor
-- Ensure `node_modules` exists
+- Restart TypeScript server in your editor (Cmd+Shift+P > "Restart TypeScript Server")
+- Ensure `node_modules` exists (`npm install`)
+
+### Images not uploading
+- Verify API credentials in environment variables
+- Check browser console for errors
+- Ensure CORS is configured for your upload provider
+- Look for inline error messages in the component
 
 ### Theme not applying
-- Wrap parent div with `dark` class for dark mode
-- Check Tailwind CSS dark mode config
-
-### Grid not responsive
-- Adjust `gridCols` prop for different breakpoints
-- Use wrapper with responsive classes
+- Check that theme name matches: `'nature'` | `'modern'` | `'fresh'` | `'dark'` | `'ocean'`
+- For custom themes, verify the structure matches `CustomTheme` type
 
 ## License
 
