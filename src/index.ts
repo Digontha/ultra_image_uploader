@@ -4,9 +4,8 @@
  */
 
 // Component
-export { ImageUploader, themes } from './components/ImageUploader';
+export { ImageUploader } from './components/ImageUploader';
 export type { ImageUploaderProps } from './components/ImageUploader';
-export type { ThemeConfig } from './types';
 
 // Upload functions
 export {

@@ -1,73 +1,30 @@
 'use client';
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, X, Image as ImageIcon, AlertCircle, Loader2 } from 'lucide-react';
+import { Upload, X, FileText, Loader2 } from 'lucide-react';
 import { uploadImage } from '../providers';
 import { isImageFile, formatFileSize } from '../utils/validation';
-// Theme presets
-export const themes = {
-    light: {
-        primary: '#6366f1',
-        background: '#ffffff',
-        border: '#e5e7eb',
-        text: '#1f2937',
-        textSecondary: '#6b7280',
-        error: '#ef4444',
-        success: '#10b981',
-        radius: '12px',
-    },
-    dark: {
-        primary: '#8b5cf6',
-        background: '#1f2937',
-        border: '#374151',
-        text: '#f9fafb',
-        textSecondary: '#9ca3af',
-        error: '#f87171',
-        success: '#34d399',
-        radius: '12px',
-    },
-    modern: {
-        primary: '#ec4899',
-        background: '#fdf2f8',
-        border: '#f9a8d4',
-        text: '#831843',
-        textSecondary: '#9d174d',
-        error: '#dc2626',
-        success: '#059669',
-        radius: '16px',
-    },
-    ocean: {
-        primary: '#0891b2',
-        background: '#ecfeff',
-        border: '#a5f3fc',
-        text: '#164e63',
-        textSecondary: '#155e75',
-        error: '#dc2626',
-        success: '#059669',
-        radius: '14px',
-    },
-    sunset: {
-        primary: '#f97316',
-        background: '#fff7ed',
-        border: '#fdba74',
-        text: '#7c2d12',
-        textSecondary: '#9a3412',
-        error: '#dc2626',
-        success: '#059669',
-        radius: '12px',
-    },
-};
-export function ImageUploader({ images, setImages, mode = 'add', defaultImages = [], multiple = false, theme = 'light', uploadText = 'Drop images here or click to browse', maxSize = 10 * 1024 * 1024, allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'], showFileSize = true, dragAndDrop = true, previewWidth = 140, previewHeight = 140, className = '', autoUpload = false, uploadConfig, onUploadComplete, onUploadError, }) {
-    const [removedDefaults, setRemovedDefaults] = useState([]);
+export function ImageUploader({ images, setImages, multiple = true, maxSize = 50 * 1024 * 1024, allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'], className = '', onUploadComplete, onUploadError, autoUpload = false, uploadConfig, }) {
     const [isDragging, setIsDragging] = useState(false);
-    const [progress, setProgress] = useState({});
+    const [fileStates, setFileStates] = useState(new Map());
     const [uploading, setUploading] = useState(false);
-    const [errors, setErrors] = useState([]);
     const fileInputRef = useRef(null);
     const dragCounter = useRef(0);
-    const currentTheme = typeof theme === 'string' ? themes[theme] : theme;
-    const mergedTheme = { ...themes.light, ...currentTheme };
-    // Auto-upload effect
+    // Initialize file states
+    useEffect(() => {
+        const newStates = new Map();
+        images.forEach((file) => {
+            const key = `${file.name}-${file.size}`;
+            if (!fileStates.has(key)) {
+                newStates.set(key, { ...file, progress: 0, status: 'pending' });
+            }
+            else {
+                newStates.set(key, fileStates.get(key));
+            }
+        });
+        setFileStates(newStates);
+    }, [images]);
+    // Auto upload effect
     useEffect(() => {
         if (autoUpload && uploadConfig && images.length > 0 && !uploading) {
             handleAutoUpload();
@@ -78,11 +35,35 @@ export function ImageUploader({ images, setImages, mode = 'add', defaultImages =
             return;
         setUploading(true);
         try {
-            const results = await Promise.all(images.map((file) => uploadImage(file, uploadConfig.provider, uploadConfig.config, {
-                onProgress: (p) => {
-                    setProgress((prev) => ({ ...prev, [file.name]: p.percentage }));
-                },
-            })));
+            const results = await Promise.all(images.map(async (file) => {
+                const key = `${file.name}-${file.size}`;
+                setFileStates((prev) => {
+                    const next = new Map(prev);
+                    next.set(key, { ...file, progress: 0, status: 'uploading' });
+                    return next;
+                });
+                const result = await uploadImage(file, uploadConfig.provider, uploadConfig.config, {
+                    onProgress: (p) => {
+                        setFileStates((prev) => {
+                            const next = new Map(prev);
+                            const current = next.get(key);
+                            if (current) {
+                                next.set(key, { ...current, progress: p.percentage });
+                            }
+                            return next;
+                        });
+                    },
+                });
+                setFileStates((prev) => {
+                    const next = new Map(prev);
+                    const current = next.get(key);
+                    if (current) {
+                        next.set(key, { ...current, progress: 100, status: 'done' });
+                    }
+                    return next;
+                });
+                return result;
+            }));
             const urls = results.map((r) => r.url);
             onUploadComplete?.(urls);
         }
@@ -92,7 +73,6 @@ export function ImageUploader({ images, setImages, mode = 'add', defaultImages =
         }
         finally {
             setUploading(false);
-            setProgress({});
         }
     };
     const validateFiles = useCallback((files) => {
@@ -100,15 +80,15 @@ export function ImageUploader({ images, setImages, mode = 'add', defaultImages =
         const invalid = [];
         Array.from(files).forEach((file) => {
             if (!isImageFile(file)) {
-                invalid.push({ ...file, error: 'Not an image file' });
+                invalid.push(file);
                 return;
             }
             if (file.size > maxSize) {
-                invalid.push({ ...file, error: `File too large (max ${formatFileSize(maxSize)})` });
+                invalid.push(file);
                 return;
             }
             if (!allowedTypes.includes(file.type)) {
-                invalid.push({ ...file, error: 'File type not allowed' });
+                invalid.push(file);
                 return;
             }
             valid.push(file);
@@ -116,14 +96,11 @@ export function ImageUploader({ images, setImages, mode = 'add', defaultImages =
         return { valid, invalid };
     }, [maxSize, allowedTypes]);
     const handleFiles = useCallback((files) => {
-        const { valid, invalid } = validateFiles(files);
-        if (invalid.length > 0) {
-            setErrors((prev) => [...prev, ...invalid]);
-        }
+        const { valid } = validateFiles(files);
         if (valid.length === 0)
             return;
         if (!multiple && valid.length > 1) {
-            alert('Only one image allowed');
+            alert('Only one file allowed');
             return;
         }
         setImages(multiple ? [...images, ...valid] : [valid[0]]);
@@ -135,8 +112,6 @@ export function ImageUploader({ images, setImages, mode = 'add', defaultImages =
         }
     };
     const handleDragEnter = (e) => {
-        if (!dragAndDrop)
-            return;
         e.preventDefault();
         e.stopPropagation();
         dragCounter.current++;
@@ -144,8 +119,6 @@ export function ImageUploader({ images, setImages, mode = 'add', defaultImages =
             setIsDragging(true);
     };
     const handleDragLeave = (e) => {
-        if (!dragAndDrop)
-            return;
         e.preventDefault();
         e.stopPropagation();
         dragCounter.current--;
@@ -153,13 +126,9 @@ export function ImageUploader({ images, setImages, mode = 'add', defaultImages =
             setIsDragging(false);
     };
     const handleDragOver = (e) => {
-        if (!dragAndDrop)
-            return;
         e.preventDefault();
     };
     const handleDrop = (e) => {
-        if (!dragAndDrop)
-            return;
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(false);
@@ -168,40 +137,24 @@ export function ImageUploader({ images, setImages, mode = 'add', defaultImages =
             handleFiles(e.dataTransfer.files);
         }
     };
-    const removeImage = (index) => {
-        setImages(images.filter((_, i) => i !== index));
+    const removeFile = (file) => {
+        setImages(images.filter((f) => f !== file));
     };
-    const removeDefault = (index) => {
-        setRemovedDefaults((prev) => [...prev, index]);
+    const getFileState = (file) => {
+        const key = `${file.name}-${file.size}`;
+        return fileStates.get(key) || { ...file, progress: 0, status: 'pending' };
     };
-    const dismissError = (index) => {
-        setErrors((prev) => prev.filter((_, i) => i !== index));
-    };
-    return (_jsxs("div", { className: `image-uploader ${className}`, children: [errors.length > 0 && (_jsx("div", { className: "space-y-2 mb-4", children: errors.map((file, i) => (_jsxs("div", { className: "flex items-center gap-2 p-3 rounded-lg", style: {
-                        backgroundColor: `${mergedTheme.error}15`,
-                        border: `1px solid ${mergedTheme.error}40`,
-                    }, children: [_jsx(AlertCircle, { size: 18, style: { color: mergedTheme.error, flexShrink: 0 } }), _jsxs("span", { className: "text-sm flex-1", style: { color: mergedTheme.text }, children: [_jsx("strong", { children: file.name }), ": ", file.error] }), _jsx("button", { onClick: () => dismissError(i), className: "p-1 hover:opacity-70", style: { color: mergedTheme.textSecondary }, children: _jsx(X, { size: 16 }) })] }, i))) })), _jsxs("div", { className: "relative h-44 w-full flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300", style: {
-                    backgroundColor: isDragging ? `${mergedTheme.primary}10` : mergedTheme.background,
-                    border: `2px dashed ${isDragging ? mergedTheme.primary : mergedTheme.border}`,
-                    borderRadius: mergedTheme.radius,
-                    transform: isDragging ? 'scale(1.01)' : 'scale(1)',
-                }, onClick: () => fileInputRef.current?.click(), onDragEnter: handleDragEnter, onDragLeave: handleDragLeave, onDragOver: handleDragOver, onDrop: handleDrop, children: [_jsx("div", { className: "p-3 rounded-full mb-3", style: { backgroundColor: `${mergedTheme.primary}15` }, children: uploading ? (_jsx(Loader2, { size: 32, className: "animate-spin", style: { color: mergedTheme.primary } })) : (_jsx(Upload, { size: 32, style: { color: mergedTheme.primary } })) }), _jsx("p", { className: "font-semibold mb-1", style: { color: mergedTheme.text }, children: uploadText }), _jsxs("p", { className: "text-sm", style: { color: mergedTheme.textSecondary }, children: ["PNG, JPG, WEBP up to ", formatFileSize(maxSize)] }), uploading && (_jsx("p", { className: "text-sm mt-2", style: { color: mergedTheme.primary }, children: "Uploading..." })), _jsx("input", { ref: fileInputRef, type: "file", accept: allowedTypes.join(','), multiple: multiple, onChange: handleChange, className: "absolute inset-0 opacity-0 cursor-pointer" })] }), _jsxs("div", { className: "flex flex-wrap gap-3 mt-4", children: [mode === 'update' &&
-                        defaultImages.map((url, i) => !removedDefaults.includes(i) && (_jsxs("div", { className: "relative group", style: { width: `${previewWidth}px` }, children: [_jsx("img", { src: url, alt: `Existing ${i + 1}`, className: "w-full object-cover shadow-md hover:shadow-xl transition-all duration-300", style: {
-                                        height: `${previewHeight}px`,
-                                        borderRadius: mergedTheme.radius,
-                                    } }), _jsx("button", { onClick: () => removeDefault(i), className: "absolute -top-2 -right-2 p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity", style: { backgroundColor: mergedTheme.error }, children: _jsx(X, { size: 14, className: "text-white" }) })] }, `default-${i}`))), images.map((file, i) => {
-                        const fileProgress = progress[file.name];
-                        return (_jsxs("div", { className: "relative group", style: { width: `${previewWidth}px` }, children: [_jsx("img", { src: URL.createObjectURL(file), alt: `Preview ${i + 1}`, className: "w-full object-cover shadow-md hover:shadow-xl transition-all duration-300", style: {
-                                        height: `${previewHeight}px`,
-                                        borderRadius: mergedTheme.radius,
-                                    } }), fileProgress !== undefined && fileProgress < 100 && (_jsx("div", { className: "absolute inset-0 flex items-center justify-center rounded-lg", style: {
-                                        backgroundColor: 'rgba(0,0,0,0.6)',
-                                        borderRadius: mergedTheme.radius,
-                                    }, children: _jsxs("span", { className: "text-white font-semibold text-sm", children: [fileProgress, "%"] }) })), showFileSize && (_jsx("div", { className: "absolute bottom-2 left-2 px-2 py-1 rounded text-xs font-medium", style: {
-                                        backgroundColor: `${mergedTheme.background}EE`,
-                                        color: mergedTheme.text,
-                                    }, children: formatFileSize(file.size) })), _jsx("button", { onClick: () => removeImage(i), className: "absolute -top-2 -right-2 p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity", style: { backgroundColor: mergedTheme.error }, children: _jsx(X, { size: 14, className: "text-white" }) })] }, i));
-                    })] }), images.length === 0 &&
-                defaultImages.filter((_, i) => !removedDefaults.includes(i)).length === 0 && (_jsxs("div", { className: "flex items-center justify-center gap-2 py-6", style: { color: mergedTheme.textSecondary }, children: [_jsx(ImageIcon, { size: 18 }), _jsx("span", { className: "text-sm", children: "No images selected" })] }))] }));
+    return (_jsxs("div", { className: `image-uploader ${className}`, children: [_jsxs("div", { className: "relative border-2 border-dashed border-gray-300 rounded-lg p-12 transition-colors duration-200", style: {
+                    borderColor: isDragging ? '#1E88E5' : undefined,
+                    backgroundColor: isDragging ? '#F5F5F5' : 'white',
+                }, onClick: () => fileInputRef.current?.click(), onDragEnter: handleDragEnter, onDragLeave: handleDragLeave, onDragOver: handleDragOver, onDrop: handleDrop, children: [_jsx("input", { ref: fileInputRef, type: "file", accept: allowedTypes.join(','), multiple: multiple, onChange: handleChange, className: "absolute inset-0 opacity-0 cursor-pointer" }), _jsxs("div", { className: "flex flex-col items-center justify-center", children: [_jsxs("div", { className: "relative mb-4", children: [_jsx("div", { className: "w-16 h-16 rounded-full border-2 border-gray-300 flex items-center justify-center bg-white", children: _jsx(FileText, { size: 32, className: "text-gray-400" }) }), _jsx("div", { className: "absolute -bottom-1 -right-1 w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center", children: _jsx(Upload, { size: 16, className: "text-white" }) })] }), _jsxs("p", { className: "text-base text-gray-700 mb-2", children: [_jsx("span", { className: "underline decoration-1 underline-offset-2 cursor-pointer hover:text-gray-900", children: "Click to upload" }), ' ', "or drag and drop"] }), _jsxs("p", { className: "text-sm text-gray-500", children: ["Maximum file size ", formatFileSize(maxSize)] })] })] }), images.length > 0 && (_jsx("div", { className: "mt-6 space-y-4", children: images.map((file) => {
+                    const state = getFileState(file);
+                    const isUploading = state.status === 'uploading';
+                    const isDone = state.status === 'done';
+                    return (_jsx("div", { className: "border border-gray-300 rounded-lg p-4 transition-all duration-200 hover:border-gray-400", children: _jsxs("div", { className: "flex items-start gap-4", children: [_jsx("div", { className: "w-10 h-10 rounded bg-gray-100 flex items-center justify-center flex-shrink-0", children: _jsx(FileText, { size: 20, className: "text-gray-500" }) }), _jsxs("div", { className: "flex-1 min-w-0", children: [_jsx("p", { className: "text-sm font-medium text-gray-900 truncate", children: file.name }), _jsx("p", { className: "text-sm text-gray-500", children: formatFileSize(file.size) }), isUploading || isDone ? (_jsx("div", { className: "mt-3", children: _jsxs("div", { className: "flex items-center justify-between mb-1", children: [_jsx("div", { className: "flex-1 mr-4", children: _jsx("div", { className: "w-full bg-gray-200 rounded-full h-1.5", children: _jsx("div", { className: "bg-gray-900 h-1.5 rounded-full transition-all duration-300", style: { width: `${state.progress || 0}%` } }) }) }), _jsxs("span", { className: "text-sm text-gray-700 font-medium", children: [state.progress || 0, "%"] })] }) })) : null] }), _jsx("button", { onClick: (e) => {
+                                        e.stopPropagation();
+                                        removeFile(file);
+                                    }, className: "flex-shrink-0 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors", children: _jsx(X, { size: 16 }) })] }) }, `${file.name}-${file.size}`));
+                }) })), images.length > 0 && !autoUpload && (_jsxs("div", { className: "mt-6 flex items-center justify-end gap-3", children: [_jsx("button", { onClick: () => setImages([]), className: "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors", children: "Cancel" }), _jsx("button", { onClick: handleAutoUpload, disabled: uploading, className: "px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2", children: uploading ? (_jsxs(_Fragment, { children: [_jsx(Loader2, { size: 16, className: "animate-spin" }), "Uploading..."] })) : ('Attach files') })] }))] }));
 }
 //# sourceMappingURL=ImageUploader.js.map

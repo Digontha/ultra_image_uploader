@@ -2,13 +2,13 @@
 
 <div align="center">
 
-A modern, beautiful React image upload component with support for multiple providers.
+A modern, beautiful React image upload component with progress tracking, drag-and-drop, and multi-provider support.
 
 [![npm version](https://badge.fury.io/js/ultra-image-uploader.svg)](https://www.npmjs.com/package/ultra-image-uploader)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
 
-**Modern UI** • **Multiple Providers** • **5 Themes** • **Production Ready**
+**Modern UI** • **Progress Bars** • **ImgBB & Cloudinary** • **Auto Import Ready**
 
 </div>
 
@@ -16,21 +16,32 @@ A modern, beautiful React image upload component with support for multiple provi
 
 ## Features
 
-- **Beautiful UI** - Modern, clean design with smooth animations
-- **5 Built-in Themes** - Light, Dark, Modern, Ocean, Sunset
-- **Custom Themes** - Create your own color schemes
-- **Multiple Providers** - ImgBB & Cloudinary support
-- **Drag & Drop** - Intuitive file handling
-- **Upload Progress** - Real-time progress tracking
-- **File Validation** - Type and size validation
-- **Auto Upload** - Optional automatic uploading
-- **TypeScript** - Fully typed
-- **Simple API** - Easy to use
+- **Modern UI** - Clean, professional file upload interface matching industry standards
+- **Progress Tracking** - Real-time upload progress with smooth animations
+- **Drag & Drop** - Intuitive drag-and-drop file handling
+- **Multiple Providers** - Built-in support for ImgBB and Cloudinary
+- **File Validation** - Type and size validation with helpful error messages
+- **Auto Upload** - Optional automatic upload on file selection
+- **Cancel/Remove** - Easy file management with cancel buttons
+- **TypeScript** - Fully typed for excellent DX
+- **Auto Import** - Works seamlessly with VS Code, WebStorm, and all popular editors
 
 ## Installation
 
+Install with any package manager:
+
 ```bash
+# npm
 npm install ultra-image-uploader
+
+# yarn
+yarn add ultra-image-uploader
+
+# pnpm
+pnpm add ultra-image-uploader
+
+# bun
+bun add ultra-image-uploader
 ```
 
 ## Quick Start
@@ -47,104 +58,97 @@ function App() {
       images={images}
       setImages={setImages}
       multiple
-      theme="light"
     />
   );
 }
 ```
 
-## Themes
+## Usage Examples
 
-Choose from 5 beautiful themes:
-
-```tsx
-// Light (default)
-<ImageUploader theme="light" images={images} setImages={setImages} />
-
-// Dark
-<ImageUploader theme="dark" images={images} setImages={setImages} />
-
-// Modern (pink)
-<ImageUploader theme="modern" images={images} setImages={setImages} />
-
-// Ocean (cyan)
-<ImageUploader theme="ocean" images={images} setImages={setImages} />
-
-// Sunset (orange)
-<ImageUploader theme="sunset" images={images} setImages={setImages} />
-```
-
-## Custom Theme
+### Basic File Upload
 
 ```tsx
-import { ImageUploader, type ThemeConfig } from "ultra-image-uploader";
+import { ImageUploader } from "ultra-image-uploader";
 
-const customTheme: ThemeConfig = {
-  primary: '#ff6b6b',
-  background: '#fff',
-  border: '#ddd',
-  text: '#333',
-  textSecondary: '#666',
-  error: '#e74c3c',
-  success: '#2ecc71',
-  radius: '8px',
-};
-
-<ImageUploader
-  images={images}
-  setImages={setImages}
-  theme={customTheme}
-/>
-```
-
-## Upload to ImgBB
-
-```tsx
-import { ImageUploader, uploadImagesToImageBB } from "ultra-image-uploader";
-
-function UploadToImgBB() {
+function BasicUpload() {
   const [images, setImages] = useState<File[]>([]);
 
-  const handleUpload = async () => {
-    const result = await uploadImagesToImageBB(images, 'YOUR_API_KEY');
-    console.log('Uploaded:', result.urls);
+  const handleUploadComplete = (urls: string[]) => {
+    console.log('Uploaded URLs:', urls);
   };
 
   return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      multiple
+      maxSize={50 * 1024 * 1024} // 50MB
+      onUploadComplete={handleUploadComplete}
+      uploadConfig={{
+        provider: 'imgbb',
+        config: { apiKey: 'your-api-key' }
+      }}
+    />
+  );
+}
+```
+
+### Upload with ImgBB
+
+```tsx
+import { ImageUploader } from "ultra-image-uploader";
+
+function ImgBBUpload() {
+  const [images, setImages] = useState<File[]>([]);
+
+  return (
     <div>
-      <ImageUploader images={images} setImages={setImages} multiple />
-      <button onClick={handleUpload}>Upload</button>
+      <ImageUploader
+        images={images}
+        setImages={setImages}
+        multiple
+        uploadConfig={{
+          provider: 'imgbb',
+          config: { apiKey: process.env.IMGBB_API_KEY }
+        }}
+        onUploadComplete={(urls) => {
+          console.log('Images uploaded to ImgBB:', urls);
+        }}
+      />
     </div>
   );
 }
 ```
 
-## Upload to Cloudinary
+### Upload with Cloudinary
 
 ```tsx
-import { ImageUploader, uploadImagesToCloudinary } from "ultra-image-uploader";
+import { ImageUploader } from "ultra-image-uploader";
 
-function UploadToCloudinary() {
+function CloudinaryUpload() {
   const [images, setImages] = useState<File[]>([]);
 
-  const handleUpload = async () => {
-    const results = await uploadImagesToCloudinary(images, {
-      cloudName: 'your-cloud-name',
-      uploadPreset: 'your-upload-preset',
-    });
-    console.log('Uploaded:', results.map(r => r.url));
-  };
-
   return (
-    <div>
-      <ImageUploader images={images} setImages={setImages} multiple theme="dark" />
-      <button onClick={handleUpload}>Upload</button>
-    </div>
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      multiple
+      uploadConfig={{
+        provider: 'cloudinary',
+        config: {
+          cloudName: 'your-cloud-name',
+          uploadPreset: 'your-upload-preset'
+        }
+      }}
+      onUploadComplete={(urls) => {
+        console.log('Images uploaded to Cloudinary:', urls);
+      }}
+    />
   );
 }
 ```
 
-## Auto Upload Mode
+### Auto Upload Mode
 
 ```tsx
 <ImageUploader
@@ -154,157 +158,193 @@ function UploadToCloudinary() {
   autoUpload
   uploadConfig={{
     provider: 'imgbb',
-    config: { apiKey: 'your-api-key' },
+    config: { apiKey: 'your-api-key' }
   }}
-  onUploadComplete={(urls) => console.log('Done!', urls)}
-  onUploadError={(error) => console.error('Error:', error)}
 />
 ```
 
-## Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `images` | `File[]` | **Required** | Selected image files |
-| `setImages` | `(files: File[]) => void` | **Required** | Update images state |
-| `multiple` | `boolean` | `false` | Allow multiple files |
-| `theme` | `'light' \| 'dark' \| 'modern' \| 'ocean' \| 'sunset' \| ThemeConfig` | `'light'` | Theme to use |
-| `mode` | `'add' \| 'update'` | `'add'` | Component mode |
-| `defaultImages` | `string[]` | `[]` | Existing image URLs |
-| `uploadText` | `string` | `'Drop images here...'` | Upload area text |
-| `maxSize` | `number` | `10485760` | Max file size (bytes) |
-| `allowedTypes` | `string[]` | Image types | Allowed MIME types |
-| `showFileSize` | `boolean` | `true` | Show file size |
-| `dragAndDrop` | `boolean` | `true` | Enable drag-drop |
-| `previewWidth` | `number` | `140` | Preview width (px) |
-| `previewHeight` | `number` | `140` | Preview height (px) |
-| `autoUpload` | `boolean` | `false` | Auto upload files |
-| `uploadConfig` | `{ provider, config }` | `undefined` | Upload config |
-| `onUploadComplete` | `(urls: string[]) => void` | `undefined` | Upload success callback |
-| `onUploadError` | `(error: Error) => void` | `undefined` | Upload error callback |
-| `className` | `string` | `''` | Extra CSS classes |
-
-## Upload Functions
-
-### `uploadImage(file, provider, config, options?)`
-
-Upload a single image.
-
-```tsx
-import { uploadImage } from "ultra-image-uploader";
-
-const result = await uploadImage(
-  file,
-  'imgbb',
-  { apiKey: 'your-key' },
-  {
-    onProgress: (p) => console.log(p.percentage + '%'),
-  }
-);
-console.log(result.url);
-```
-
-### `uploadImages(files, provider, config, options?)`
-
-Upload multiple images.
-
-```tsx
-const results = await uploadImages(files, 'cloudinary', {
-  cloudName: 'your-cloud',
-});
-```
-
-### `uploadImagesToImageBB(images, apiKey)`
-
-Upload to ImgBB (shorthand).
-
-```tsx
-const { urls } = await uploadImagesToImageBB(images, 'api-key');
-```
-
-### `uploadImagesToCloudinary(files, config, options?)`
-
-Upload to Cloudinary (shorthand).
-
-```tsx
-const results = await uploadImagesToCloudinary(images, {
-  cloudName: 'your-cloud',
-  uploadPreset: 'your-preset',
-});
-```
-
-## Get API Keys
-
-### ImgBB
-1. Go to [imgbb.com/settings/api](https://imgbb.com/settings/api)
-2. Copy your API key
-
-### Cloudinary
-1. Sign up at [cloudinary.com](https://cloudinary.com)
-2. Get your cloud name from dashboard
-3. Create upload preset (Settings → Upload)
-
-## TypeScript
-
-All types are exported:
-
-```tsx
-import type {
-  UploadProvider,
-  UploadResult,
-  ThemeConfig,
-  ImageUploaderProps,
-  FileValidationOptions,
-  // ... more
-} from "ultra-image-uploader";
-```
-
-## Examples
-
-### Profile Picture
+### Single File Upload
 
 ```tsx
 <ImageUploader
   images={avatar}
   setImages={setAvatar}
   multiple={false}
-  maxSize={2 * 1024 * 1024}
-  theme="modern"
+  maxSize={2 * 1024 * 1024} // 2MB
 />
 ```
 
-### Product Gallery
+## Component Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `images` | `File[]` | **Required** | Selected image files |
+| `setImages` | `(files: File[]) => void` | **Required** | Update images state |
+| `multiple` | `boolean` | `true` | Allow multiple file selection |
+| `maxSize` | `number` | `52428800` | Max file size in bytes (50MB) |
+| `allowedTypes` | `string[]` | Image types | Allowed MIME types |
+| `className` | `string` | `''` | Extra CSS classes |
+| `autoUpload` | `boolean` | `false` | Auto-upload on selection |
+| `uploadConfig` | `{ provider, config }` | `undefined` | Upload configuration |
+| `onUploadComplete` | `(urls: string[]) => void` | `undefined` | Upload success callback |
+| `onUploadError` | `(error: Error) => void` | `undefined` | Upload error callback |
+
+## Upload Functions
+
+You can also use the upload functions directly:
 
 ```tsx
-<ImageUploader
-  images={products}
-  setImages={setProducts}
-  multiple
-  mode="update"
-  defaultImages={existingImages}
-  allowedTypes={['image/jpeg', 'image/webp']}
-  theme="ocean"
-/>
+import {
+  uploadImage,
+  uploadImages,
+  uploadImagesToImageBB,
+  uploadImagesToCloudinary
+} from "ultra-image-uploader";
+
+// Upload single image
+const result = await uploadImage(file, 'imgbb', { apiKey: 'key' });
+
+// Upload multiple images
+const results = await uploadImages(files, 'cloudinary', {
+  cloudName: 'your-cloud'
+});
+
+// Convenience functions
+const { urls } = await uploadImagesToImageBB(images, apiKey);
+const uploads = await uploadImagesToCloudinary(images, config);
 ```
 
-### Custom Colors
+## API Configuration
+
+### ImgBB
+
+1. Go to [imgbb.com/settings/api](https://imgbb.com/settings/api)
+2. Copy your API key
+3. Use in the component:
+
+```tsx
+uploadConfig={{
+  provider: 'imgbb',
+  config: { apiKey: 'your-api-key' }
+}}
+```
+
+### Cloudinary
+
+1. Sign up at [cloudinary.com](https://cloudinary.com)
+2. Get your **cloud name** from dashboard
+3. Create an **upload preset** (Settings → Upload → Upload presets)
+4. Use in the component:
+
+```tsx
+uploadConfig={{
+  provider: 'cloudinary',
+  config: {
+    cloudName: 'your-cloud-name',
+    uploadPreset: 'your-upload-preset'
+  }
+}}
+```
+
+## TypeScript
+
+All exports are fully typed:
+
+```tsx
+import type {
+  ImageUploaderProps,
+  UploadProvider,
+  UploadResult,
+  ProviderConfig,
+  UploadOptions
+} from "ultra-image-uploader";
+```
+
+## Auto Import Support
+
+This package supports auto-import in all major editors:
+
+- **VS Code** - Auto-suggestions work out of the box
+- **WebStorm** - Full IntelliSense support
+- **Neovim** - Works with LSP and completion plugins
+- **Sublime Text** - Works with LSP packages
+- **All TypeScript editors** - Full type checking and suggestions
+
+## Styling
+
+The component uses Tailwind CSS classes. You can add custom styling:
 
 ```tsx
 <ImageUploader
   images={images}
   setImages={setImages}
-  theme={{
-    primary: '#00d9ff',
-    background: '#0a0a0a',
-    border: '#333',
-    text: '#fff',
-    textSecondary: '#999',
-    error: '#ff4757',
-    success: '#2ed573',
-    radius: '16px',
-  }}
+  className="max-w-2xl mx-auto"
 />
 ```
+
+### Custom Styling
+
+For complete customization, you can wrap and override styles:
+
+```tsx
+<div className="your-custom-wrapper">
+  <ImageUploader
+    images={images}
+    setImages={setImages}
+    className="your-custom-class"
+  />
+</div>
+```
+
+## Troubleshooting
+
+### Auto imports not working
+
+**VS Code:**
+1. Ensure TypeScript is enabled in your project
+2. Restart the TypeScript server: `Cmd/Ctrl + Shift + P` → "TypeScript: Restart TS Server"
+3. Check that `node_modules/ultra-image-uploader` exists
+
+**WebStorm:**
+1. Invalidate caches: `File` → `Invalidate Caches and Restart`
+2. Ensure TypeScript plugin is enabled
+
+### Uploads failing
+
+1. **Check API keys** - Verify your ImgBB or Cloudinary credentials
+2. **CORS issues** - Ensure your domain is whitelisted
+3. **File size** - Check if file exceeds provider limits
+4. **Network** - Check browser console for network errors
+
+### TypeScript errors
+
+```bash
+# Reinstall dependencies
+rm -rf node_modules package-lock.json
+npm install
+
+# Restart TypeScript server in your editor
+```
+
+### Build issues
+
+```bash
+# Clean and rebuild
+npm run clean
+npm run build
+```
+
+## Browser Support
+
+- Chrome/Edge (latest)
+- Firefox (latest)
+- Safari (latest)
+- Mobile browsers (iOS Safari, Chrome Mobile)
+
+## Requirements
+
+- React >= 18.0.0
+- TypeScript (optional but recommended)
 
 ## License
 
@@ -314,7 +354,16 @@ MIT © Digontha Das
 
 - [GitHub](https://github.com/digontha/ultra-image-uploader)
 - [NPM](https://www.npmjs.com/package/ultra-image-uploader)
-- [Issues](https://github.com/digontha/ultra-image-uploader/issues)
+- [Report Issues](https://github.com/digontha/ultra-image-uploader/issues)
+
+## Changelog
+
+### v2.0.0
+- 🎨 Modern UI redesign with progress bars
+- ✅ Auto import support for all editors
+- 📦 Simplified package structure
+- 🚀 Improved drag-and-drop experience
+- 🎯 Better TypeScript support
 
 ---
 

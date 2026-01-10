@@ -3,7 +3,7 @@
  * Modern image upload component with ImgBB & Cloudinary support
  */
 // Component
-export { ImageUploader, themes } from './components/ImageUploader';
+export { ImageUploader } from './components/ImageUploader';
 // Upload functions
 export { uploadImage, uploadImages, uploadImagesToImageBB, uploadImagesToCloudinary, } from './providers';
 // Validation
