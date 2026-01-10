@@ -1,7 +1,7 @@
 {
   "name": "ultra-image-uploader",
-  "version": "1.0.0",
-  "description": "A modern, feature-rich React image upload component with support for ImgBB and Cloudinary",
+  "version": "2.0.0",
+  "description": "A modern, beautiful React image upload component with ImgBB & Cloudinary support",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -29,11 +29,10 @@
     "react-component",
     "image-uploader",
     "multiple-upload",
-    "cloudinary-upload",
-    "imgbb-upload",
+    "themes",
+    "modern-ui",
     "progress-tracking",
-    "file-validation",
-    "themeable"
+    "file-validation"
   ],
   "author": "Digontha Das",
   "license": "MIT",

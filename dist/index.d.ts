@@ -1,11 +1,11 @@
 /**
  * Ultra Image Uploader
- * A modern, flexible image upload solution for React with support for multiple providers
+ * Modern image upload component with ImgBB & Cloudinary support
  */
-export { ImageUploader } from './components/ImageUploader';
-export type { ImageUploaderProps, UploaderTheme, ThemePreset, } from './components/ImageUploader';
-export { uploadImage, uploadImages, uploadImagesToImageBB, uploadImagesToCloudinary, } from './utils/upload';
-export { ImgBBProvider, CloudinaryProvider, providerRegistry } from './providers';
-export type { UploadProvider, UploadProgress, ProgressCallback, UploadResult, UploadOptions, ImageTransformOptions, ProviderConfig, ImageUploadConfig, ValidationError, ValidationResult, FileValidationOptions, ImageProvider, UploadError, } from './types';
-export { validateImageFile, validateImageDimensions, validateFileComplete, formatFileSize, getFileExtension, isImageFile, } from './utils/validation';
+export { ImageUploader, themes } from './components/ImageUploader';
+export type { ImageUploaderProps } from './components/ImageUploader';
+export type { ThemeConfig } from './types';
+export { uploadImage, uploadImages, uploadImagesToImageBB, uploadImagesToCloudinary, } from './providers';
+export type { UploadProvider, UploadResult, UploadProgress, UploadOptions, ImageTransformOptions, ProviderConfig, FileValidationOptions, ValidationResult, ValidationError, } from './types';
+export { validateImageFile, validateImageDimensions, validateFileComplete, formatFileSize, isImageFile, } from './utils/validation';
 //# sourceMappingURL=index.d.ts.map

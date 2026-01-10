@@ -1,16 +1,8 @@
 /**
- * Core types and interfaces for Ultra Image Uploader
+ * Core types for Ultra Image Uploader
  */
 
 export type UploadProvider = 'imgbb' | 'cloudinary';
-
-export interface UploadProgress {
-  loaded: number;
-  total: number;
-  percentage: number;
-}
-
-export type ProgressCallback = (progress: UploadProgress) => void;
 
 export interface UploadResult {
   url: string;
@@ -19,8 +11,14 @@ export interface UploadResult {
   metadata?: Record<string, unknown>;
 }
 
+export interface UploadProgress {
+  loaded: number;
+  total: number;
+  percentage: number;
+}
+
 export interface UploadOptions {
-  onProgress?: ProgressCallback;
+  onProgress?: (progress: UploadProgress) => void;
   transformOptions?: ImageTransformOptions;
 }
 
@@ -33,16 +31,19 @@ export interface ImageTransformOptions {
 }
 
 export interface ProviderConfig {
-  apiKey: string;
-  uploadPreset?: string;
+  apiKey?: string;
   cloudName?: string;
+  uploadPreset?: string;
   baseUrl?: string;
 }
 
-export interface ImageUploadConfig {
-  provider: UploadProvider;
-  config: ProviderConfig;
-  options?: UploadOptions;
+export interface FileValidationOptions {
+  maxSize?: number;
+  minWidth?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  maxHeight?: number;
+  allowedTypes?: string[];
 }
 
 export interface ValidationError {
@@ -56,24 +57,13 @@ export interface ValidationResult {
   errors?: ValidationError[];
 }
 
-export interface FileValidationOptions {
-  maxSize?: number; // in bytes
-  minWidth?: number;
-  maxWidth?: number;
-  minHeight?: number;
-  maxHeight?: number;
-  allowedTypes?: string[];
-}
-
-export interface ImageProvider {
-  name: UploadProvider;
-  upload(file: File, config: ProviderConfig, options?: UploadOptions): Promise<UploadResult>;
-  uploadMultiple(files: File[], config: ProviderConfig, options?: UploadOptions): Promise<UploadResult[]>;
-  validate(file: File, validationOptions?: FileValidationOptions): ValidationResult | Promise<ValidationResult>;
-}
-
-export interface UploadError extends Error {
-  code: string;
-  provider: UploadProvider;
-  details?: unknown;
+export interface ThemeConfig {
+  primary?: string;
+  background?: string;
+  border?: string;
+  text?: string;
+  textSecondary?: string;
+  error?: string;
+  success?: string;
+  radius?: string;
 }
