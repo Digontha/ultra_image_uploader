@@ -1,5 +1,5 @@
-import React from 'react';
-import type { UploadProvider, ProviderConfig } from '../types';
+import React from "react";
+import type { UploadProvider, ProviderConfig } from "../types";
 export declare const themes: {
     nature: {
         name: string;
@@ -73,11 +73,11 @@ export declare const themes: {
     };
 };
 export type ThemeName = keyof typeof themes;
-export type CustomTheme = typeof themes[ThemeName];
+export type CustomTheme = (typeof themes)[ThemeName];
 export interface ImageUploaderProps {
     images: File[];
     setImages: (images: File[]) => void;
-    mode?: 'add' | 'update';
+    mode?: "add" | "update";
     defaultImages?: string[];
     multiple?: boolean;
     maxSize?: number;
@@ -93,8 +93,8 @@ export interface ImageUploaderProps {
     theme?: ThemeName;
     customTheme?: CustomTheme;
     showThemeSelector?: boolean;
-    previewSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
-    borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'full';
+    previewSize?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+    borderRadius?: "none" | "sm" | "md" | "lg" | "full";
     className?: string;
     containerClassName?: string;
     showImageCount?: boolean;
