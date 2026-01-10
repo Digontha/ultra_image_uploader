@@ -55,48 +55,46 @@ import { useState } from "react";
 function App() {
   const [images, setImages] = useState<File[]>([]);
 
-  return (
-    <ImageUploader
-      images={images}
-      setImages={setImages}
-      multiple
-    />
-  );
+  return <ImageUploader images={images} setImages={setImages} multiple />;
 }
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| **Core** |
-| `images` | `File[]` | **Required** | Selected image files |
-| `setImages` | `(files: File[]) => void` | **Required** | Update images state |
-| **Mode** |
-| `mode` | `'add' \| 'update'` | `'add'` | Upload mode |
-| `defaultImages` | `string[]` | `[]` | Default images (update mode) |
-| **File Constraints** |
-| `multiple` | `boolean` | `true` | Allow multiple files |
-| `maxSize` | `number` | `52428800` | Max file size (50MB) |
-| `allowedTypes` | `string[]` | Image types | Allowed MIME types |
-| `maxImages` | `number` | `20` | Maximum images allowed |
-| **Upload** |
-| `uploadConfig` | `{ provider, config }` | `undefined` | Upload configuration |
-| `autoUpload` | `boolean` | `false` | Auto-upload on selection |
-| `onUploadComplete` | `(urls: string[]) => void` | `undefined` | Success callback |
-| `onUploadError` | `(error: Error) => void` | `undefined` | Error callback |
-| **Theme & Styling** |
-| `theme` | `'nature' \| 'modern' \| 'fresh' \| 'dark' \| 'ocean'` | `'nature'` | Built-in theme |
-| `customTheme` | `Theme` | `undefined` | Custom theme object |
-| `showThemeSelector` | `boolean` | `false` | Show theme selector |
-| `borderRadius` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'` | `'md'` | Border radius |
-| `previewSize` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'lg'` | Upload icon size |
-| `className` | `string` | `''` | Custom class name |
-| `containerClassName` | `string` | `'max-w-5xl mx-auto mt-10'` | Container styling |
-| **UI Toggles** |
-| `showImageCount` | `boolean` | `true` | Show image count badge |
-| `showFileName` | `boolean` | `true` | Show file name under preview |
-| `showFileSize` | `boolean` | `true` | Show file size under preview |
+| Prop                    | Type                                                   | Default                     | Description                     |
+| ----------------------- | ------------------------------------------------------ | --------------------------- | ------------------------------- |
+| **Core**                |
+| `images`                | `File[]`                                               | **Required**                | Selected image files            |
+| `setImages`             | `(files: File[]) => void`                              | **Required**                | Update images state             |
+| **Mode**                |
+| `mode`                  | `'add' \| 'update'`                                    | `'add'`                     | Upload mode                     |
+| `defaultImages`         | `string[]`                                             | `[]`                        | Default images (update mode)    |
+| **File Constraints**    |
+| `multiple`              | `boolean`                                              | `true`                      | Allow multiple files            |
+| `maxSize`               | `number`                                               | `52428800`                  | Max file size (50MB)            |
+| `allowedTypes`          | `string[]`                                             | Image types                 | Allowed MIME types              |
+| `maxImages`             | `number`                                               | `20`                        | Maximum images allowed          |
+| **Upload**              |
+| `uploadConfig`          | `{ provider, config }`                                 | `undefined`                 | Upload configuration            |
+| `autoUpload`            | `boolean`                                              | `false`                     | Auto-upload on selection        |
+| `onUploadComplete`      | `(urls: string[]) => void`                             | `undefined`                 | Success callback                |
+| `onUploadError`         | `(error: Error) => void`                               | `undefined`                 | Error callback                  |
+| **Theme & Styling**     |
+| `theme`                 | `'nature' \| 'modern' \| 'fresh' \| 'dark' \| 'ocean'` | `'nature'`                  | Built-in theme                  |
+| `customTheme`           | `Theme`                                                | `undefined`                 | Custom theme object             |
+| `showThemeSelector`     | `boolean`                                              | `false`                     | Show theme selector             |
+| `borderRadius`          | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`             | `'md'`                      | Border radius                   |
+| `previewSize`           | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'`        | `'lg'`                      | Upload icon size                |
+| `className`             | `string`                                               | `''`                        | Custom class name               |
+| `containerClassName`    | `string`                                               | `'max-w-5xl mx-auto mt-10'` | Container styling               |
+| **UI Toggles**          |
+| `showImageCount`        | `boolean`                                              | `true`                      | Show image count badge          |
+| `showFileName`          | `boolean`                                              | `true`                      | Show file name under preview    |
+| `showFileSize`          | `boolean`                                              | `true`                      | Show file size under preview    |
+| **Custom Button**       |
+| `customUploadButton`    | `React.ReactNode`                                      | `undefined`                 | Custom upload button component  |
+| `hideDefaultUploadArea` | `boolean`                                              | `false`                     | Hide default upload area        |
+| `onUploadClick`         | `() => void`                                           | `undefined`                 | Callback when upload is clicked |
 
 ## Examples
 
@@ -109,13 +107,7 @@ import { useState } from "react";
 function BasicExample() {
   const [images, setImages] = useState<File[]>([]);
 
-  return (
-    <ImageUploader
-      images={images}
-      setImages={setImages}
-      multiple
-    />
-  );
+  return <ImageUploader images={images} setImages={setImages} multiple />;
 }
 ```
 
@@ -123,19 +115,19 @@ function BasicExample() {
 
 ```tsx
 // Nature theme (green) - Default
-<ImageUploader theme="nature" images={images} setImages={setImages} />
+<ImageUploader theme="nature" images={images} setImages={setImages} containerClassName="w-full max-w-2xl mx-auto"/>
 
 // Modern theme (neutral/monochrome)
-<ImageUploader theme="modern" images={images} setImages={setImages} />
+<ImageUploader theme="modern" images={images} setImages={setImages} containerClassName="w-full max-w-2xl mx-auto"/>
 
 // Fresh theme (blue)
-<ImageUploader theme="fresh" images={images} setImages={setImages} />
+<ImageUploader theme="fresh" images={images} setImages={setImages} containerClassName="w-full max-w-2xl mx-auto"/>
 
 // Dark theme (dark gradient with blue accent)
-<ImageUploader theme="dark" images={images} setImages={setImages} />
+<ImageUploader theme="dark" images={images} setImages={setImages} containerClassName="w-full max-w-2xl mx-auto"/>
 
 // Ocean theme (blue gradient)
-<ImageUploader theme="ocean" images={images} setImages={setImages} />
+<ImageUploader theme="ocean" images={images} setImages={setImages} containerClassName="w-full max-w-2xl mx-auto"/>
 ```
 
 ### Upload with ImgBB
@@ -153,14 +145,14 @@ function ImgBBUpload() {
       multiple
       theme="nature"
       uploadConfig={{
-        provider: 'imgbb',
-        config: { apiKey: process.env.IMGBB_API_KEY! }
+        provider: "imgbb",
+        config: { apiKey: process.env.IMGBB_API_KEY! },
       }}
       onUploadComplete={(urls) => {
-        console.log('Uploaded URLs:', urls);
+        console.log("Uploaded URLs:", urls);
       }}
       onUploadError={(error) => {
-        console.error('Upload failed:', error.message);
+        console.error("Upload failed:", error.message);
       }}
     />
   );
@@ -180,14 +172,14 @@ function CloudinaryUpload() {
       multiple
       theme="fresh"
       uploadConfig={{
-        provider: 'cloudinary',
+        provider: "cloudinary",
         config: {
           cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!,
-          uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
-        }
+          uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!,
+        },
       }}
       onUploadComplete={(urls) => {
-        console.log('Uploaded URLs:', urls);
+        console.log("Uploaded URLs:", urls);
       }}
     />
   );
@@ -206,8 +198,8 @@ function AutoUploadExample() {
       setImages={setImages}
       autoUpload
       uploadConfig={{
-        provider: 'imgbb',
-        config: { apiKey: process.env.IMGBB_API_KEY! }
+        provider: "imgbb",
+        config: { apiKey: process.env.IMGBB_API_KEY! },
       }}
       onUploadComplete={(urls) => {
         // Automatically upload when images are selected
@@ -225,8 +217,8 @@ function UpdateExample() {
   const [newImages, setNewImages] = useState<File[]>([]);
 
   const existingImages = [
-    'https://example.com/image1.jpg',
-    'https://example.com/image2.jpg'
+    "https://example.com/image1.jpg",
+    "https://example.com/image2.jpg",
   ];
 
   return (
@@ -251,17 +243,17 @@ function CustomThemeExample() {
   const [images, setImages] = useState<File[]>([]);
 
   const customTheme: CustomTheme = {
-    name: 'MyBrand',
+    name: "MyBrand",
     colors: {
-      primary: '#FF6B35',
-      primaryHover: '#E55A2B',
-      background: '#FFF5F0',
-      border: '#FFE5D9',
-      text: '#2D3142',
-      textSecondary: '#4F5D75',
-      cardBg: '#FFFFFF',
-      cardBorder: '#FFE5D9',
-      shadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+      primary: "#FF6B35",
+      primaryHover: "#E55A2B",
+      background: "#FFF5F0",
+      border: "#FFE5D9",
+      text: "#2D3142",
+      textSecondary: "#4F5D75",
+      cardBg: "#FFFFFF",
+      cardBorder: "#FFE5D9",
+      shadow: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
     },
   };
 
@@ -336,9 +328,9 @@ function ProductGallery() {
 
   const handleUploadComplete = async (urls: string[]) => {
     // Save to database
-    await fetch('/api/products/images', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    await fetch("/api/products/images", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ images: urls }),
     });
   };
@@ -353,13 +345,64 @@ function ProductGallery() {
       theme="nature"
       borderRadius="lg"
       uploadConfig={{
-        provider: 'cloudinary',
+        provider: "cloudinary",
         config: {
           cloudName: process.env.CLOUDINARY_CLOUD_NAME!,
-          uploadPreset: 'products'
-        }
+          uploadPreset: "products",
+        },
       }}
       onUploadComplete={handleUploadComplete}
+    />
+  );
+}
+```
+
+### Custom Upload Button
+
+Use your own button for triggering image upload:
+
+```tsx
+function CustomButtonExample() {
+  const [images, setImages] = useState<File[]>([]);
+
+  const customButton = (
+    <button className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+      📷 Choose Images
+    </button>
+  );
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      customUploadButton={customButton}
+      hideDefaultUploadArea={true}
+      onUploadClick={() => console.log("Upload clicked!")}
+    />
+  );
+}
+```
+
+### Custom Button with Default Upload Area
+
+Show both your custom button AND the default drag-and-drop area:
+
+```tsx
+function HybridExample() {
+  const [images, setImages] = useState<File[]>([]);
+
+  const quickUploadBtn = (
+    <button className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium">
+      Quick Upload
+    </button>
+  );
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      customUploadButton={quickUploadBtn}
+      // Don't hide the default area - users get both options!
     />
   );
 }
@@ -368,30 +411,35 @@ function ProductGallery() {
 ## Built-in Themes
 
 ### Nature (Green)
+
 - Soft greens with organic feel
 - Primary: `#16a34a`
 - Background: `#f0fdf4`
 - Perfect for: Nature, health, eco-friendly apps
 
 ### Modern (Neutral)
+
 - Clean monochrome design
 - Primary: `#09090b`
 - Background: `#fafafa`
 - Perfect for: Professional apps, portfolios, dashboards
 
 ### Fresh (Blue)
+
 - Light blue airy design
 - Primary: `#0284c7`
 - Background: `#f0f9ff`
 - Perfect for: Social apps, SaaS, modern web apps
 
 ### Dark (Dark Gradient)
+
 - Dark gradient with blue accent
 - Primary: `#3b82f6`
 - Background: `linear-gradient(135deg, #1e293b 0%, #0f172a 100%)`
 - Perfect for: Dark mode apps, modern interfaces
 
 ### Ocean (Blue Gradient)
+
 - Beautiful blue to purple gradient
 - Primary: `#06b6d4`
 - Background: `linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)`
@@ -402,31 +450,31 @@ function ProductGallery() {
 ### Border Radius Options
 
 ```tsx
-borderRadius="none"   // 0
-borderRadius="sm"     // 0.25rem
-borderRadius="md"     // 0.375rem (default)
-borderRadius="lg"     // 0.5rem
-borderRadius="full"   // 9999px (circular)
+borderRadius = "none"; // 0
+borderRadius = "sm"; // 0.25rem
+borderRadius = "md"; // 0.375rem (default)
+borderRadius = "lg"; // 0.5rem
+borderRadius = "full"; // 9999px (circular)
 ```
 
 ### Preview Size Options
 
 ```tsx
-previewSize="xs"   // Extra small (40px)
-previewSize="sm"   // Small (48px)
-previewSize="md"   // Medium (56px)
-previewSize="lg"   // Large (64px) - default
-previewSize="xl"   // Extra large (80px)
-previewSize="2xl"  // Double extra large (96px)
+previewSize = "xs"; // Extra small (40px)
+previewSize = "sm"; // Small (48px)
+previewSize = "md"; // Medium (56px)
+previewSize = "lg"; // Large (64px) - default
+previewSize = "xl"; // Extra large (80px)
+previewSize = "2xl"; // Double extra large (96px)
 ```
 
 ### Show/Hide Elements
 
 ```tsx
 <ImageUploader
-  showImageCount={false}    // Hide image count badge
-  showFileName={false}      // Hide file names
-  showFileSize={false}      // Hide file sizes
+  showImageCount={false} // Hide image count badge
+  showFileName={false} // Hide file names
+  showFileSize={false} // Hide file sizes
 />
 ```
 
@@ -465,12 +513,17 @@ uploadConfig={{
 Full TypeScript support:
 
 ```tsx
-import type { ImageUploaderProps, ThemeName, CustomTheme } from "ultra-image-uploader";
+import type {
+  ImageUploaderProps,
+  ThemeName,
+  CustomTheme,
+} from "ultra-image-uploader";
 ```
 
 ## Animations
 
 The component includes smooth, performance-friendly animations:
+
 - Drag-over state with border color change
 - Fade-in for image previews
 - Hover effects with shadow and scale
@@ -489,6 +542,7 @@ The component includes smooth, performance-friendly animations:
 ## Responsive Design
 
 The grid layout adapts to screen sizes:
+
 - Mobile (2 columns): 320px+
 - Tablet (3 columns): 640px+
 - Desktop (4 columns): 768px+
@@ -511,16 +565,19 @@ The component includes built-in API key validation and displays errors inline:
 If your API key is missing or invalid, the component will automatically display an error message:
 
 **ImgBB Errors:**
+
 - "ImgBB API key is missing. Please provide a valid API key in the uploadConfig."
 - "ImgBB API key cannot be empty."
 
 **Cloudinary Errors:**
+
 - "Cloudinary cloud name is missing. Please provide a valid cloud name in the uploadConfig."
 - "Cloudinary cloud name cannot be empty."
 
 ### Error Display
 
 Errors appear in a dismissible alert box below the header with:
+
 - Red error icon
 - Clear error message
 - Dismiss button to clear the error
@@ -534,11 +591,11 @@ You can also handle errors programmatically using the `onUploadError` callback:
   images={images}
   setImages={setImages}
   uploadConfig={{
-    provider: 'imgbb',
-    config: { apiKey: process.env.IMGBB_API_KEY! }
+    provider: "imgbb",
+    config: { apiKey: process.env.IMGBB_API_KEY! },
   }}
   onUploadError={(error) => {
-    console.error('Upload failed:', error);
+    console.error("Upload failed:", error);
     // Show custom notification
     toast.error(error.message);
   }}
@@ -548,16 +605,19 @@ You can also handle errors programmatically using the `onUploadError` callback:
 ## Troubleshooting
 
 ### Auto imports not working
+
 - Restart TypeScript server in your editor (Cmd+Shift+P > "Restart TypeScript Server")
 - Ensure `node_modules` exists (`npm install`)
 
 ### Images not uploading
+
 - Verify API credentials in environment variables
 - Check browser console for errors
 - Ensure CORS is configured for your upload provider
 - Look for inline error messages in the component
 
 ### Theme not applying
+
 - Check that theme name matches: `'nature'` | `'modern'` | `'fresh'` | `'dark'` | `'ocean'`
 - For custom themes, verify the structure matches `CustomTheme` type
 

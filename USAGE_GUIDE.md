@@ -267,6 +267,77 @@ function BrandedUploader() {
 }
 ```
 
+### Use Case 6: Custom Upload Button
+
+Use your own styled button to trigger file selection:
+
+```tsx
+import { ImageUploader } from "ultra-image-uploader";
+import { useState } from "react";
+
+function CustomButtonUploader() {
+  const [images, setImages] = useState<File[]>([]);
+
+  const myCustomButton = (
+    <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl">
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <span className="font-semibold">Select Photos</span>
+    </button>
+  );
+
+  return (
+    <div className="max-w-2xl mx-auto p-6">
+      <h2 className="text-xl font-bold mb-4">Photo Gallery</h2>
+
+      <ImageUploader
+        images={images}
+        setImages={setImages}
+        customUploadButton={myCustomButton}
+        hideDefaultUploadArea={true}
+        multiple={true}
+        maxImages={10}
+        onUploadClick={() => {
+          console.log('Custom button clicked!');
+          // Add any custom logic here
+        }}
+      />
+    </div>
+  );
+}
+```
+
+### Use Case 7: Hybrid Approach
+
+Provide both a quick-upload button AND keep the drag-and-drop area:
+
+```tsx
+function HybridUploader() {
+  const [images, setImages] = useState<File[]>([]);
+
+  const quickUploadBtn = (
+    <button className="w-full px-4 py-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all">
+      Quick Add Photos
+    </button>
+  );
+
+  return (
+    <div>
+      {/* Custom button shown above */}
+      <ImageUploader
+        images={images}
+        setImages={setImages}
+        customUploadButton={quickUploadBtn}
+        // Don't set hideDefaultUploadArea - both will be shown
+        multiple={true}
+        theme="ocean"
+      />
+    </div>
+  );
+}
+```
+
 ---
 
 ## Best Practices

@@ -1,3 +1,4 @@
+import React from 'react';
 import type { UploadProvider, ProviderConfig } from '../types';
 export declare const themes: {
     nature: {
@@ -99,6 +100,9 @@ export interface ImageUploaderProps {
     showImageCount?: boolean;
     showFileSize?: boolean;
     showFileName?: boolean;
+    customUploadButton?: React.ReactNode;
+    hideDefaultUploadArea?: boolean;
+    onUploadClick?: () => void;
 }
-export declare function ImageUploader({ images, setImages, mode, defaultImages, multiple, maxSize, allowedTypes, maxImages, uploadConfig, autoUpload, onUploadComplete, onUploadError, theme, customTheme, showThemeSelector, previewSize, borderRadius, className, containerClassName, showImageCount, showFileSize, showFileName, }: ImageUploaderProps): import("react/jsx-runtime").JSX.Element;
+export declare function ImageUploader({ images, setImages, mode, defaultImages, multiple, maxSize, allowedTypes, maxImages, uploadConfig, autoUpload, onUploadComplete, onUploadError, theme, customTheme, showThemeSelector, previewSize, borderRadius, className, containerClassName, showImageCount, showFileSize, showFileName, customUploadButton, hideDefaultUploadArea, onUploadClick, }: ImageUploaderProps): import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=ImageUploader.d.ts.map

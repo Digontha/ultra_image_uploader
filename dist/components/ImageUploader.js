@@ -84,7 +84,7 @@ const borderRadiusMap = {
     lg: '0.5rem',
     full: '9999px',
 };
-export function ImageUploader({ images, setImages, mode = 'add', defaultImages = [], multiple = true, maxSize = 50 * 1024 * 1024, allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'], maxImages = 20, uploadConfig, autoUpload = false, onUploadComplete, onUploadError, theme = 'nature', customTheme, showThemeSelector = false, previewSize = 'lg', borderRadius = 'md', className = '', containerClassName = 'max-w-5xl mx-auto mt-10', showImageCount = true, showFileSize = true, showFileName = true, }) {
+export function ImageUploader({ images, setImages, mode = 'add', defaultImages = [], multiple = true, maxSize = 50 * 1024 * 1024, allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'], maxImages = 20, uploadConfig, autoUpload = false, onUploadComplete, onUploadError, theme = 'nature', customTheme, showThemeSelector = false, previewSize = 'lg', borderRadius = 'md', className = '', containerClassName = 'max-w-5xl mx-auto mt-10', showImageCount = true, showFileSize = true, showFileName = true, customUploadButton, hideDefaultUploadArea = false, onUploadClick, }) {
     const [selectedTheme, setSelectedTheme] = useState(theme);
     const [isDragging, setIsDragging] = useState(false);
     const [fileStates, setFileStates] = useState(new Map());
@@ -229,6 +229,10 @@ export function ImageUploader({ images, setImages, mode = 'add', defaultImages =
             e.target.value = '';
         }
     };
+    const handleUploadClick = () => {
+        onUploadClick?.();
+        fileInputRef.current?.click();
+    };
     const handleDragEnter = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -272,30 +276,21 @@ export function ImageUploader({ images, setImages, mode = 'add', defaultImages =
                         }, children: [_jsx("span", { children: images.length }), maxImages && _jsxs("span", { className: "text-muted", style: { color: t.textSecondary }, children: ["/ ", maxImages] })] }))] }), error && (_jsxs("div", { className: "mb-4 p-4 rounded-md border flex items-start gap-3", style: { backgroundColor: '#fef2f2', borderColor: '#fecaca' }, children: [_jsx("div", { className: "flex-shrink-0", children: _jsx("svg", { className: "w-5 h-5", style: { color: '#dc2626' }, fill: "currentColor", viewBox: "0 0 20 20", children: _jsx("path", { fillRule: "evenodd", d: "M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z", clipRule: "evenodd" }) }) }), _jsxs("div", { className: "flex-1", children: [_jsx("p", { className: "text-sm font-medium", style: { color: '#991b1b' }, children: "Upload Error" }), _jsx("p", { className: "text-sm mt-1", style: { color: '#b91c1c' }, children: error })] }), _jsxs("button", { onClick: () => setError(null), className: "flex-shrink-0 inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2", style: { color: '#991b1b' }, "aria-label": "Dismiss error", children: [_jsx("span", { className: "sr-only", children: "Dismiss" }), _jsx("svg", { className: "w-4 h-4", fill: "currentColor", viewBox: "0 0 20 20", children: _jsx("path", { fillRule: "evenodd", d: "M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z", clipRule: "evenodd" }) })] })] })), showThemeSelector && (_jsx("div", { className: "mb-6 inline-flex gap-1 p-1 rounded-lg border", style: { backgroundColor: t.background, borderColor: t.cardBorder }, children: Object.keys(themes).map((key) => (_jsx("button", { onClick: () => setSelectedTheme(key), className: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors", style: {
                         backgroundColor: selectedTheme === key ? t.cardBg : 'transparent',
                         color: selectedTheme === key ? t.text : t.textSecondary,
-                    }, children: themes[key].name }, key))) })), _jsxs("div", { role: "button", tabIndex: 0, "aria-label": "Upload images", className: "relative group cursor-pointer overflow-hidden transition-all duration-200", style: {
+                    }, children: themes[key].name }, key))) })), customUploadButton && (_jsx("div", { className: "mb-4", children: _jsx("div", { onClick: handleUploadClick, children: customUploadButton }) })), _jsx("input", { ref: fileInputRef, type: "file", accept: allowedTypes.join(','), multiple: multiple, onChange: handleChange, className: "hidden", style: { display: 'none' } }), !hideDefaultUploadArea && (_jsx("div", { role: "button", tabIndex: 0, "aria-label": "Upload images", className: "relative group cursor-pointer overflow-hidden transition-all duration-200", style: {
                     borderRadius: radius,
                     border: `2px dashed ${isDragging ? t.primary : t.cardBorder}`,
                     backgroundColor: t.background,
-                }, onClick: () => fileInputRef.current?.click(), onKeyDown: (e) => {
+                }, onClick: handleUploadClick, onKeyDown: (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        fileInputRef.current?.click();
+                        handleUploadClick();
                     }
-                }, onDragEnter: handleDragEnter, onDragLeave: handleDragLeave, onDragOver: handleDragOver, onDrop: handleDrop, children: [_jsx("input", { ref: fileInputRef, type: "file", accept: allowedTypes.join(','), multiple: multiple, onChange: handleChange, className: "absolute inset-0 opacity-0 cursor-pointer", style: {
-                            zIndex: 10,
-                            width: '0.1px',
-                            height: '0.1px',
-                            padding: 0,
-                            margin: 0,
-                            overflow: 'hidden',
-                            clip: 'rect(0, 0, 0, 0)',
-                            whiteSpace: 'nowrap',
-                        }, tabIndex: -1 }), _jsxs("div", { className: "flex flex-col items-center justify-center p-8", children: [_jsx("div", { className: "mb-4 flex items-center justify-center transition-transform duration-200", style: { color: isDragging ? t.primary : t.textSecondary }, children: _jsx("div", { className: "flex items-center justify-center rounded-full", style: {
-                                        width: previewSize === '2xl' ? '96px' : previewSize === 'xl' ? '80px' : previewSize === 'lg' ? '64px' : previewSize === 'md' ? '56px' : previewSize === 'sm' ? '48px' : '40px',
-                                        height: previewSize === '2xl' ? '96px' : previewSize === 'xl' ? '80px' : previewSize === 'lg' ? '64px' : previewSize === 'md' ? '56px' : previewSize === 'sm' ? '48px' : '40px',
-                                        backgroundColor: t.cardBg,
-                                        border: `1px solid ${t.cardBorder}`,
-                                    }, children: _jsx(ImageIcon, { size: 24 }) }) }), _jsx("div", { className: "text-center space-y-1", children: _jsx("p", { className: "text-sm font-medium", style: { color: t.text }, children: isDragging ? 'Drop here' : 'Click or drop to upload' }) })] })] }), (images.length > 0 || defaultImages.length > 0) && (_jsx("div", { className: "mt-6", children: _jsxs("div", { className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4", children: [mode === 'update' &&
+                }, onDragEnter: handleDragEnter, onDragLeave: handleDragLeave, onDragOver: handleDragOver, onDrop: handleDrop, children: _jsxs("div", { className: "flex flex-col items-center justify-center p-8", children: [_jsx("div", { className: "mb-4 flex items-center justify-center transition-transform duration-200", style: { color: isDragging ? t.primary : t.textSecondary }, children: _jsx("div", { className: "flex items-center justify-center rounded-full", style: {
+                                    width: previewSize === '2xl' ? '96px' : previewSize === 'xl' ? '80px' : previewSize === 'lg' ? '64px' : previewSize === 'md' ? '56px' : previewSize === 'sm' ? '48px' : '40px',
+                                    height: previewSize === '2xl' ? '96px' : previewSize === 'xl' ? '80px' : previewSize === 'lg' ? '64px' : previewSize === 'md' ? '56px' : previewSize === 'sm' ? '48px' : '40px',
+                                    backgroundColor: t.cardBg,
+                                    border: `1px solid ${t.cardBorder}`,
+                                }, children: _jsx(ImageIcon, { size: 24 }) }) }), _jsx("div", { className: "text-center space-y-1", children: _jsx("p", { className: "text-sm font-medium", style: { color: t.text }, children: isDragging ? 'Drop here' : 'Click or drop to upload' }) })] }) })), (images.length > 0 || defaultImages.length > 0) && (_jsx("div", { className: "mt-6", children: _jsxs("div", { className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4", children: [mode === 'update' &&
                             defaultImages.map((url, index) => !removedDefaults.includes(index) && (_jsx("div", { className: "relative group aspect-square", style: { animation: 'fadeIn 0.2s ease-out' }, children: _jsxs("div", { className: "relative w-full h-full overflow-hidden border transition-all duration-200 hover:shadow-md", style: {
                                         borderRadius: radius,
                                         borderColor: t.cardBorder,

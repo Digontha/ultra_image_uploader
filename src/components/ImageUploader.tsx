@@ -122,6 +122,11 @@ export interface ImageUploaderProps {
   showImageCount?: boolean;
   showFileSize?: boolean;
   showFileName?: boolean;
+
+  // Custom button support
+  customUploadButton?: React.ReactNode;
+  hideDefaultUploadArea?: boolean;
+  onUploadClick?: () => void;
 }
 
 interface FileWithProgress extends File {
@@ -162,6 +167,9 @@ export function ImageUploader({
   showImageCount = true,
   showFileSize = true,
   showFileName = true,
+  customUploadButton,
+  hideDefaultUploadArea = false,
+  onUploadClick,
 }: ImageUploaderProps) {
   const [selectedTheme, setSelectedTheme] = useState<ThemeName>(theme);
   const [isDragging, setIsDragging] = useState(false);
@@ -333,6 +341,11 @@ export function ImageUploader({
     }
   };
 
+  const handleUploadClick = () => {
+    onUploadClick?.();
+    fileInputRef.current?.click();
+  };
+
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -448,48 +461,50 @@ export function ImageUploader({
         </div>
       )}
 
-      {/* Upload Area */}
-      <div
-        role="button"
-        tabIndex={0}
-        aria-label="Upload images"
-        className="relative group cursor-pointer overflow-hidden transition-all duration-200"
-        style={{
-          borderRadius: radius,
-          border: `2px dashed ${isDragging ? t.primary : t.cardBorder}`,
-          backgroundColor: t.background,
-        }}
-        onClick={() => fileInputRef.current?.click()}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            fileInputRef.current?.click();
-          }
-        }}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={allowedTypes.join(',')}
-          multiple={multiple}
-          onChange={handleChange}
-          className="absolute inset-0 opacity-0 cursor-pointer"
+      {/* Custom Upload Button */}
+      {customUploadButton && (
+        <div className="mb-4">
+          <div onClick={handleUploadClick}>
+            {customUploadButton}
+          </div>
+        </div>
+      )}
+
+      {/* Hidden File Input (always present for custom button) */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={allowedTypes.join(',')}
+        multiple={multiple}
+        onChange={handleChange}
+        className="hidden"
+        style={{ display: 'none' }}
+      />
+
+      {/* Default Upload Area */}
+      {!hideDefaultUploadArea && (
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Upload images"
+          className="relative group cursor-pointer overflow-hidden transition-all duration-200"
           style={{
-            zIndex: 10,
-            width: '0.1px',
-            height: '0.1px',
-            padding: 0,
-            margin: 0,
-            overflow: 'hidden',
-            clip: 'rect(0, 0, 0, 0)',
-            whiteSpace: 'nowrap',
+            borderRadius: radius,
+            border: `2px dashed ${isDragging ? t.primary : t.cardBorder}`,
+            backgroundColor: t.background,
           }}
-          tabIndex={-1}
-        />
+          onClick={handleUploadClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleUploadClick();
+            }
+          }}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
 
         <div className="flex flex-col items-center justify-center p-8">
           <div
@@ -516,6 +531,7 @@ export function ImageUploader({
           </div>
         </div>
       </div>
+      )}
 
       {/* Images Grid */}
       {(images.length > 0 || defaultImages.length > 0) && (
