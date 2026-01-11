@@ -1,5 +1,5 @@
 "use client";
-import { jsxs as _jsxs, jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, Image as ImageIcon, Loader2, Trash2 } from "lucide-react";
 import { uploadImage } from "../providers";
@@ -84,7 +84,7 @@ const borderRadiusMap = {
     lg: "0.5rem",
     full: "9999px",
 };
-export function ImageUploader({ images, setImages, mode = "add", defaultImages = [], multiple = true, maxSize = 50 * 1024 * 1024, allowedTypes = [
+export function ImageUploader({ images, setImages, textLabels, mode = "add", defaultImages = [], multiple = true, maxSize = 50 * 1024 * 1024, allowedTypes = [
     "image/jpeg",
     "image/jpg",
     "image/png",
@@ -103,6 +103,24 @@ export function ImageUploader({ images, setImages, mode = "add", defaultImages =
     const currentTheme = customTheme || themes[selectedTheme];
     const t = currentTheme.colors;
     const radius = borderRadiusMap[borderRadius];
+    // Text labels with defaults
+    const labels = {
+        uploadAreaText: textLabels?.uploadAreaText || "Click or drop to upload",
+        uploadAreaDragText: textLabels?.uploadAreaDragText || "Drop here",
+        uploadButton: textLabels?.uploadButton || "Upload",
+        uploadingButton: textLabels?.uploadingButton || "Uploading...",
+        removeImageLabel: textLabels?.removeImageLabel || "Remove image",
+        dismissErrorLabel: textLabels?.dismissErrorLabel || "Dismiss",
+        uploadErrorTitle: textLabels?.uploadErrorTitle || "Upload Error",
+        uploadErrorMissingImgBBKey: textLabels?.uploadErrorMissingImgBBKey ||
+            "ImgBB API key is missing. Please provide a valid API key in the uploadConfig.",
+        uploadErrorMissingImgBBKeyEmpty: textLabels?.uploadErrorMissingImgBBKeyEmpty ||
+            "ImgBB API key cannot be empty.",
+        uploadErrorMissingCloudinaryName: textLabels?.uploadErrorMissingCloudinaryName ||
+            "Cloudinary cloud name is missing. Please provide a valid cloud name in the uploadConfig.",
+        uploadErrorMissingCloudinaryNameEmpty: textLabels?.uploadErrorMissingCloudinaryNameEmpty ||
+            "Cloudinary cloud name cannot be empty.",
+    };
     // Generate previews
     useEffect(() => {
         const newStates = new Map();
@@ -138,22 +156,22 @@ export function ImageUploader({ images, setImages, mode = "add", defaultImages =
             return null;
         if (uploadConfig.provider === "imgbb") {
             if (!uploadConfig.config.apiKey) {
-                return "ImgBB API key is missing. Please provide a valid API key in the uploadConfig.";
+                return labels.uploadErrorMissingImgBBKey;
             }
             if (uploadConfig.config.apiKey.trim() === "") {
-                return "ImgBB API key cannot be empty.";
+                return labels.uploadErrorMissingImgBBKeyEmpty;
             }
         }
         if (uploadConfig.provider === "cloudinary") {
             if (!uploadConfig.config.cloudName) {
-                return "Cloudinary cloud name is missing. Please provide a valid cloud name in the uploadConfig.";
+                return labels.uploadErrorMissingCloudinaryName;
             }
             if (uploadConfig.config.cloudName.trim() === "") {
-                return "Cloudinary cloud name cannot be empty.";
+                return labels.uploadErrorMissingCloudinaryNameEmpty;
             }
         }
         return null;
-    }, [uploadConfig]);
+    }, [uploadConfig, labels]);
     const handleAutoUpload = async () => {
         if (!uploadConfig)
             return;
@@ -283,16 +301,14 @@ export function ImageUploader({ images, setImages, mode = "add", defaultImages =
         const key = `${file.name}-${file.size}`;
         return fileStates.get(key) || { ...file, progress: 0, status: "pending" };
     };
-    return (_jsxs("div", { className: `image-uploader ${containerClassName} ${className}`, children: [_jsxs("div", { className: "flex items-center justify-between mb-6", children: [_jsxs("div", { children: [_jsxs("h2", { className: "text-2xl font-semibold tracking-tight", style: { color: t.text }, children: [mode === "update" ? "Update" : "Upload", " Images"] }), _jsx("p", { className: "text-sm", style: { color: t.textSecondary }, children: multiple
-                                    ? "Drag and drop or click to upload"
-                                    : "Select an image to upload" })] }), showImageCount && (_jsxs("div", { className: "inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border", style: {
-                            backgroundColor: t.cardBg,
-                            borderColor: t.cardBorder,
-                            color: t.text,
-                        }, children: [_jsx("span", { children: images.length }), maxImages && (_jsxs("span", { className: "text-muted", style: { color: t.textSecondary }, children: ["/ ", maxImages] }))] }))] }), error && (_jsxs("div", { className: "mb-4 p-4 rounded-md border flex items-start gap-3", style: { backgroundColor: "#fef2f2", borderColor: "#fecaca" }, children: [_jsx("div", { className: "flex-shrink-0", children: _jsx("svg", { className: "w-5 h-5", style: { color: "#dc2626" }, fill: "currentColor", viewBox: "0 0 20 20", children: _jsx("path", { fillRule: "evenodd", d: "M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z", clipRule: "evenodd" }) }) }), _jsxs("div", { className: "flex-1", children: [_jsx("p", { className: "text-sm font-medium", style: { color: "#991b1b" }, children: "Upload Error" }), _jsx("p", { className: "text-sm mt-1", style: { color: "#b91c1c" }, children: error })] }), _jsxs("button", { onClick: () => setError(null), className: "flex-shrink-0 inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2", style: { color: "#991b1b" }, "aria-label": "Dismiss error", children: [_jsx("span", { className: "sr-only", children: "Dismiss" }), _jsx("svg", { className: "w-4 h-4", fill: "currentColor", viewBox: "0 0 20 20", children: _jsx("path", { fillRule: "evenodd", d: "M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z", clipRule: "evenodd" }) })] })] })), showThemeSelector && (_jsx("div", { className: "mb-6 inline-flex gap-1 p-1 rounded-lg border", style: { backgroundColor: t.background, borderColor: t.cardBorder }, children: Object.keys(themes).map((key) => (_jsx("button", { onClick: () => setSelectedTheme(key), className: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors", style: {
+    return (_jsxs("div", { className: `image-uploader ${containerClassName} ${className}`, children: [_jsx("div", { className: "", children: showImageCount && (_jsxs("div", { className: "inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border", style: {
+                        backgroundColor: t.cardBg,
+                        borderColor: t.cardBorder,
+                        color: t.text,
+                    }, children: [_jsx("span", { children: images.length }), maxImages && (_jsxs("span", { className: "text-muted", style: { color: t.textSecondary }, children: ["/ ", maxImages] }))] })) }), error && (_jsxs("div", { className: "mb-4 p-4 rounded-md border flex items-start gap-3", style: { backgroundColor: "#fef2f2", borderColor: "#fecaca" }, children: [_jsx("div", { className: "flex-shrink-0", children: _jsx("svg", { className: "w-5 h-5", style: { color: "#dc2626" }, fill: "currentColor", viewBox: "0 0 20 20", children: _jsx("path", { fillRule: "evenodd", d: "M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z", clipRule: "evenodd" }) }) }), _jsxs("div", { className: "flex-1", children: [_jsx("p", { className: "text-sm font-medium", style: { color: "#991b1b" }, children: labels.uploadErrorTitle }), _jsx("p", { className: "text-sm mt-1", style: { color: "#b91c1c" }, children: error })] }), _jsxs("button", { onClick: () => setError(null), className: "flex-shrink-0 inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2", style: { color: "#991b1b" }, "aria-label": labels.dismissErrorLabel, children: [_jsx("span", { className: "sr-only", children: labels.dismissErrorLabel }), _jsx("svg", { className: "w-4 h-4", fill: "currentColor", viewBox: "0 0 20 20", children: _jsx("path", { fillRule: "evenodd", d: "M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z", clipRule: "evenodd" }) })] })] })), showThemeSelector && (_jsx("div", { className: "mb-6 inline-flex gap-1 p-1 rounded-lg border", style: { backgroundColor: t.background, borderColor: t.cardBorder }, children: Object.keys(themes).map((key) => (_jsx("button", { onClick: () => setSelectedTheme(key), className: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors", style: {
                         backgroundColor: selectedTheme === key ? t.cardBg : "transparent",
                         color: selectedTheme === key ? t.text : t.textSecondary,
-                    }, children: themes[key].name }, key))) })), customUploadButton && (_jsx("div", { className: "mb-4", children: _jsx("div", { onClick: handleUploadClick, children: customUploadButton }) })), _jsx("input", { ref: fileInputRef, type: "file", accept: allowedTypes.join(","), multiple: multiple, onChange: handleChange, className: "hidden", style: { display: "none" } }), !hideDefaultUploadArea && (_jsx("div", { role: "button", tabIndex: 0, "aria-label": "Upload images", className: "relative group cursor-pointer overflow-hidden transition-all duration-200", style: {
+                    }, children: themes[key].name }, key))) })), customUploadButton && (_jsx("div", { className: "mb-4", children: _jsx("div", { onClick: handleUploadClick, children: customUploadButton }) })), _jsx("input", { ref: fileInputRef, type: "file", accept: allowedTypes.join(","), multiple: multiple, onChange: handleChange, className: "hidden", style: { display: "none" } }), !hideDefaultUploadArea && (_jsx("div", { role: "button", tabIndex: 0, "aria-label": labels.uploadAreaDragText, className: "relative group cursor-pointer overflow-hidden transition-all duration-200", style: {
                     borderRadius: radius,
                     border: `2px dashed ${isDragging ? t.primary : t.cardBorder}`,
                     backgroundColor: t.background,
@@ -326,16 +342,16 @@ export function ImageUploader({ images, setImages, mode = "add", defaultImages =
                                                         : "20px",
                                     backgroundColor: t.cardBg,
                                     border: `1px solid ${t.cardBorder}`,
-                                }, children: _jsx(ImageIcon, { size: 24 }) }) }), _jsx("div", { className: "text-center space-y-1", children: _jsx("p", { className: "text-sm font-medium", style: { color: t.text }, children: isDragging ? "Drop here" : "Click or drop to upload" }) })] }) })), (images.length > 0 || defaultImages.length > 0) && (_jsx("div", { className: "mt-6", children: _jsxs("div", { className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4", children: [mode === "update" &&
-                            defaultImages.map((url, index) => !removedDefaults.includes(index) && (_jsx("div", { className: "relative group aspect-square", style: { animation: "fadeIn 0.2s ease-out" }, children: _jsxs("div", { className: "relative w-full h-full overflow-hidden border transition-all duration-200 hover:shadow-md", style: {
-                                        borderRadius: radius,
-                                        borderColor: t.cardBorder,
-                                        backgroundColor: t.cardBg,
-                                    }, children: [_jsx("img", { src: url, alt: `Preview ${index + 1}`, className: "w-full h-full object-cover" }), _jsx("button", { onClick: () => removeDefaultImage(index), className: "absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full transition-opacity duration-200 hover:opacity-80", style: {
-                                                backgroundColor: "rgba(0,0,0,0.7)",
-                                                backdropFilter: "blur(4px)",
-                                                zIndex: 10,
-                                            }, "aria-label": "Remove image", children: _jsx(Trash2, { size: 14, className: "text-white" }) })] }) }, `default-${index}`))), images.map((file, index) => {
+                                }, children: _jsx(ImageIcon, { size: 24 }) }) }), _jsx("div", { className: "text-center space-y-1", children: _jsx("p", { className: "text-sm font-medium", style: { color: t.text }, children: isDragging ? labels.uploadAreaDragText : labels.uploadAreaText }) })] }) })), (images.length > 0 || defaultImages.length > 0) && (_jsx("div", { className: "mt-6", children: _jsxs("div", { className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4", children: [mode === "update" &&
+                            defaultImages.map((url, index) => !removedDefaults.includes(index) && (_jsxs("div", { className: "relative group aspect-square", style: { animation: "fadeIn 0.2s ease-out" }, children: [_jsx("div", { className: "relative w-full h-full overflow-hidden border transition-all duration-200 hover:shadow-md", style: {
+                                            borderRadius: radius,
+                                            borderColor: t.cardBorder,
+                                            backgroundColor: t.cardBg,
+                                        }, children: _jsx("img", { src: url, alt: `Preview ${index + 1}`, className: "w-full h-full object-cover" }) }), _jsx("button", { type: "button", onClick: () => removeDefaultImage(index), className: "absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full transition-opacity duration-200 hover:opacity-80", style: {
+                                            backgroundColor: "rgba(255, 13, 13, 0.7)",
+                                            backdropFilter: "blur(4px)",
+                                            zIndex: 20, // Increased z-index
+                                        }, "aria-label": labels.removeImageLabel, children: _jsx(Trash2, { size: 14, className: "text-white" }) })] }, `default-${index}`))), images.map((file, index) => {
                             const state = getFileState(file);
                             const isUploading = state.status === "uploading";
                             const isDone = state.status === "done";
@@ -346,16 +362,16 @@ export function ImageUploader({ images, setImages, mode = "add", defaultImages =
                                             borderRadius: radius,
                                             borderColor: t.cardBorder,
                                             backgroundColor: t.cardBg,
-                                        }, children: [state.preview ? (_jsx("img", { src: state.preview, alt: file.name, className: "w-full h-full object-cover" })) : (_jsx("div", { className: "w-full h-full flex items-center justify-center", style: { backgroundColor: t.border }, children: _jsx(ImageIcon, { size: 32, style: { color: t.primary } }) })), _jsx("button", { onClick: () => removeFile(index), className: "absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full transition-opacity duration-200 hover:opacity-80", style: {
-                                                    backgroundColor: "rgba(0,0,0,0.7)",
-                                                    backdropFilter: "blur(4px)",
-                                                    zIndex: 10,
-                                                }, "aria-label": "Remove image", children: _jsx(Trash2, { size: 14, className: "text-white" }) }), isUploading && (_jsx("div", { className: "absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center", children: _jsxs("div", { className: "text-center", children: [_jsx(Loader2, { size: 24, className: "animate-spin text-white mx-auto mb-2" }), _jsxs("p", { className: "text-white text-xs font-medium", children: [state.progress, "%"] })] }) })), isDone && (_jsx("div", { className: "absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center", children: _jsx("div", { className: "w-12 h-12 bg-green-500 rounded-full flex items-center justify-center", style: {
+                                        }, children: [state.preview ? (_jsx("img", { src: state.preview, alt: file.name, className: "w-full h-full object-cover" })) : (_jsx("div", { className: "w-full h-full flex items-center justify-center", style: { backgroundColor: t.border }, children: _jsx(ImageIcon, { size: 32, style: { color: t.primary } }) })), isUploading && (_jsx("div", { className: "absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center", style: { zIndex: 5 }, children: _jsxs("div", { className: "text-center", children: [_jsx(Loader2, { size: 24, className: "animate-spin text-white mx-auto mb-2" }), _jsxs("p", { className: "text-white text-xs font-medium", children: [state.progress, "%"] })] }) })), isDone && (_jsx("div", { className: "absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center", style: { zIndex: 5 }, children: _jsx("div", { className: "w-12 h-12 bg-green-500 rounded-full flex items-center justify-center", style: {
                                                         boxShadow: "0 4px 12px rgba(34, 197, 94, 0.4)",
-                                                    }, children: _jsx("svg", { className: "w-6 h-6 text-white", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: _jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 3, d: "M5 13l4 4L19 7" }) }) }) }))] }), (showFileName || showFileSize) && (_jsxs("div", { className: "mt-2 space-y-0.5", children: [showFileName && (_jsx("p", { className: "text-xs font-medium truncate", style: { color: t.text }, children: file.name })), showFileSize && (_jsx("p", { className: "text-xs", style: { color: t.textSecondary }, children: formatFileSize(file.size) }))] }))] }, `${file.name}-${file.size}`));
+                                                    }, children: _jsx("svg", { className: "w-6 h-6 text-white", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: _jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 3, d: "M5 13l4 4L19 7" }) }) }) }))] }), _jsx("button", { type: "button", onClick: () => removeFile(index), className: "absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full transition-opacity duration-200 hover:opacity-80", style: {
+                                            backgroundColor: "rgba(255, 0, 0, 0.7)",
+                                            backdropFilter: "blur(4px)",
+                                            zIndex: 20, // Increased z-index
+                                        }, "aria-label": labels.removeImageLabel, children: _jsx(Trash2, { size: 14, className: "text-white" }) }), (showFileName || showFileSize) && (_jsxs("div", { className: "mt-2 space-y-0.5", children: [showFileName && (_jsx("p", { className: "text-xs font-medium truncate", style: { color: t.text }, children: file.name })), showFileSize && (_jsx("p", { className: "text-xs", style: { color: t.textSecondary }, children: formatFileSize(file.size) }))] }))] }, `${file.name}-${file.size}`));
                         })] }) })), images.length > 0 && !autoUpload && uploadConfig && (_jsx("div", { className: "mt-6 flex items-center justify-end", children: _jsx("button", { onClick: handleAutoUpload, disabled: uploading, className: "px-4 py-2 text-sm font-medium rounded-md text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2", style: {
                         backgroundColor: t.primary,
-                    }, children: uploading ? (_jsxs(_Fragment, { children: [_jsx(Loader2, { size: 16, className: "animate-spin" }), "Uploading..."] })) : (_jsxs(_Fragment, { children: [_jsx(Upload, { size: 16 }), "Upload ", images.length, " ", images.length === 1 ? "image" : "images"] })) }) })), _jsx("style", { children: `
+                    }, children: uploading ? (_jsxs(_Fragment, { children: [_jsx(Loader2, { size: 16, className: "animate-spin" }), labels.uploadingButton] })) : (_jsxs(_Fragment, { children: [_jsx(Upload, { size: 16 }), labels.uploadButton, " ", images.length, " ", images.length === 1 ? "image" : "images"] })) }) })), _jsx("style", { children: `
         @keyframes fadeIn {
           from {
             opacity: 0;

@@ -74,9 +74,25 @@ export declare const themes: {
 };
 export type ThemeName = keyof typeof themes;
 export type CustomTheme = (typeof themes)[ThemeName];
+export interface ImageUploaderTextLabels {
+    uploadAreaText?: string;
+    uploadAreaDragText?: string;
+    uploadButton?: string;
+    uploadingButton?: string;
+    imageCountLabel?: string;
+    removeImageLabel?: string;
+    uploadImagesLabel?: string;
+    dismissErrorLabel?: string;
+    uploadErrorTitle?: string;
+    uploadErrorMissingImgBBKey?: string;
+    uploadErrorMissingImgBBKeyEmpty?: string;
+    uploadErrorMissingCloudinaryName?: string;
+    uploadErrorMissingCloudinaryNameEmpty?: string;
+}
 export interface ImageUploaderProps {
     images: File[];
     setImages: (images: File[]) => void;
+    textLabels?: ImageUploaderTextLabels;
     mode?: "add" | "update";
     defaultImages?: string[];
     multiple?: boolean;
@@ -104,5 +120,5 @@ export interface ImageUploaderProps {
     hideDefaultUploadArea?: boolean;
     onUploadClick?: () => void;
 }
-export declare function ImageUploader({ images, setImages, mode, defaultImages, multiple, maxSize, allowedTypes, maxImages, uploadConfig, autoUpload, onUploadComplete, onUploadError, theme, customTheme, showThemeSelector, previewSize, borderRadius, className, containerClassName, showImageCount, showFileSize, showFileName, customUploadButton, hideDefaultUploadArea, onUploadClick, }: ImageUploaderProps): import("react/jsx-runtime").JSX.Element;
+export declare function ImageUploader({ images, setImages, textLabels, mode, defaultImages, multiple, maxSize, allowedTypes, maxImages, uploadConfig, autoUpload, onUploadComplete, onUploadError, theme, customTheme, showThemeSelector, previewSize, borderRadius, className, containerClassName, showImageCount, showFileSize, showFileName, customUploadButton, hideDefaultUploadArea, onUploadClick, }: ImageUploaderProps): import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=ImageUploader.d.ts.map

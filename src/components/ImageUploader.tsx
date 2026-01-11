@@ -83,10 +83,39 @@ export const themes = {
 export type ThemeName = keyof typeof themes;
 export type CustomTheme = (typeof themes)[ThemeName];
 
+export interface ImageUploaderTextLabels {
+
+  // Upload area text
+  uploadAreaText?: string;
+  uploadAreaDragText?: string;
+
+  // Button text
+  uploadButton?: string;
+  uploadingButton?: string;
+
+  // Image count
+  imageCountLabel?: string;
+
+  // Accessibility
+  removeImageLabel?: string;
+  uploadImagesLabel?: string;
+  dismissErrorLabel?: string;
+
+  // Error messages
+  uploadErrorTitle?: string;
+  uploadErrorMissingImgBBKey?: string;
+  uploadErrorMissingImgBBKeyEmpty?: string;
+  uploadErrorMissingCloudinaryName?: string;
+  uploadErrorMissingCloudinaryNameEmpty?: string;
+}
+
 export interface ImageUploaderProps {
   // Core props
   images: File[];
   setImages: (images: File[]) => void;
+
+  // Text labels
+  textLabels?: ImageUploaderTextLabels;
 
   // Mode
   mode?: "add" | "update";
@@ -147,6 +176,7 @@ const borderRadiusMap = {
 export function ImageUploader({
   images,
   setImages,
+  textLabels,
   mode = "add",
   defaultImages = [],
   multiple = true,
@@ -193,6 +223,29 @@ export function ImageUploader({
   const t = currentTheme.colors;
   const radius = borderRadiusMap[borderRadius];
 
+  // Text labels with defaults
+  const labels = {
+    uploadAreaText: textLabels?.uploadAreaText || "Click or drop to upload",
+    uploadAreaDragText: textLabels?.uploadAreaDragText || "Drop here",
+    uploadButton: textLabels?.uploadButton || "Upload",
+    uploadingButton: textLabels?.uploadingButton || "Uploading...",
+    removeImageLabel: textLabels?.removeImageLabel || "Remove image",
+    dismissErrorLabel: textLabels?.dismissErrorLabel || "Dismiss",
+    uploadErrorTitle: textLabels?.uploadErrorTitle || "Upload Error",
+    uploadErrorMissingImgBBKey:
+      textLabels?.uploadErrorMissingImgBBKey ||
+      "ImgBB API key is missing. Please provide a valid API key in the uploadConfig.",
+    uploadErrorMissingImgBBKeyEmpty:
+      textLabels?.uploadErrorMissingImgBBKeyEmpty ||
+      "ImgBB API key cannot be empty.",
+    uploadErrorMissingCloudinaryName:
+      textLabels?.uploadErrorMissingCloudinaryName ||
+      "Cloudinary cloud name is missing. Please provide a valid cloud name in the uploadConfig.",
+    uploadErrorMissingCloudinaryNameEmpty:
+      textLabels?.uploadErrorMissingCloudinaryNameEmpty ||
+      "Cloudinary cloud name cannot be empty.",
+  };
+
   // Generate previews
   useEffect(() => {
     const newStates = new Map<string, FileWithProgress>();
@@ -230,24 +283,24 @@ export function ImageUploader({
 
     if (uploadConfig.provider === "imgbb") {
       if (!uploadConfig.config.apiKey) {
-        return "ImgBB API key is missing. Please provide a valid API key in the uploadConfig.";
+        return labels.uploadErrorMissingImgBBKey;
       }
       if (uploadConfig.config.apiKey.trim() === "") {
-        return "ImgBB API key cannot be empty.";
+        return labels.uploadErrorMissingImgBBKeyEmpty;
       }
     }
 
     if (uploadConfig.provider === "cloudinary") {
       if (!uploadConfig.config.cloudName) {
-        return "Cloudinary cloud name is missing. Please provide a valid cloud name in the uploadConfig.";
+        return labels.uploadErrorMissingCloudinaryName;
       }
       if (uploadConfig.config.cloudName.trim() === "") {
-        return "Cloudinary cloud name cannot be empty.";
+        return labels.uploadErrorMissingCloudinaryNameEmpty;
       }
     }
 
     return null;
-  }, [uploadConfig]);
+  }, [uploadConfig, labels]);
 
   const handleAutoUpload = async () => {
     if (!uploadConfig) return;
@@ -412,20 +465,7 @@ export function ImageUploader({
   return (
     <div className={`image-uploader ${containerClassName} ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2
-            className="text-2xl font-semibold tracking-tight"
-            style={{ color: t.text }}
-          >
-            {mode === "update" ? "Update" : "Upload"} Images
-          </h2>
-          <p className="text-sm" style={{ color: t.textSecondary }}>
-            {multiple
-              ? "Drag and drop or click to upload"
-              : "Select an image to upload"}
-          </p>
-        </div>
+      <div className="">
 
         {showImageCount && (
           <div
@@ -468,7 +508,7 @@ export function ImageUploader({
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium" style={{ color: "#991b1b" }}>
-              Upload Error
+              {labels.uploadErrorTitle}
             </p>
             <p className="text-sm mt-1" style={{ color: "#b91c1c" }}>
               {error}
@@ -478,9 +518,9 @@ export function ImageUploader({
             onClick={() => setError(null)}
             className="flex-shrink-0 inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2"
             style={{ color: "#991b1b" }}
-            aria-label="Dismiss error"
+            aria-label={labels.dismissErrorLabel}
           >
-            <span className="sr-only">Dismiss</span>
+            <span className="sr-only">{labels.dismissErrorLabel}</span>
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
@@ -538,7 +578,7 @@ export function ImageUploader({
         <div
           role="button"
           tabIndex={0}
-          aria-label="Upload images"
+          aria-label={labels.uploadAreaDragText}
           className="relative group cursor-pointer overflow-hidden transition-all duration-200"
           style={{
             borderRadius: radius,
@@ -599,7 +639,7 @@ export function ImageUploader({
 
             <div className="text-center space-y-1">
               <p className="text-sm font-medium" style={{ color: t.text }}>
-                {isDragging ? "Drop here" : "Click or drop to upload"}
+                {isDragging ? labels.uploadAreaDragText : labels.uploadAreaText}
               </p>
             </div>
           </div>
@@ -633,21 +673,22 @@ export function ImageUploader({
                           alt={`Preview ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
-
-                        {/* Remove Button */}
-                        <button
-                          onClick={() => removeDefaultImage(index)}
-                          className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full transition-opacity duration-200 hover:opacity-80"
-                          style={{
-                            backgroundColor: "rgba(0,0,0,0.7)",
-                            backdropFilter: "blur(4px)",
-                            zIndex: 10,
-                          }}
-                          aria-label="Remove image"
-                        >
-                          <Trash2 size={14} className="text-white" />
-                        </button>
                       </div>
+
+                      {/* Remove Button - Moved Outside to prevent clipping */}
+                      <button
+                        type="button"
+                        onClick={() => removeDefaultImage(index)}
+                        className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full transition-opacity duration-200 hover:opacity-80"
+                        style={{
+                          backgroundColor: "rgba(255, 13, 13, 0.7)",
+                          backdropFilter: "blur(4px)",
+                          zIndex: 20, // Increased z-index
+                        }}
+                        aria-label={labels.removeImageLabel}
+                      >
+                        <Trash2 size={14} className="text-white" />
+                      </button>
                     </div>
                   )
               )}
@@ -690,23 +731,12 @@ export function ImageUploader({
                       </div>
                     )}
 
-                    {/* Remove Button */}
-                    <button
-                      onClick={() => removeFile(index)}
-                      className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full transition-opacity duration-200 hover:opacity-80"
-                      style={{
-                        backgroundColor: "rgba(0,0,0,0.7)",
-                        backdropFilter: "blur(4px)",
-                        zIndex: 10,
-                      }}
-                      aria-label="Remove image"
-                    >
-                      <Trash2 size={14} className="text-white" />
-                    </button>
-
                     {/* Progress Overlay */}
                     {isUploading && (
-                      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                      <div
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center"
+                        style={{ zIndex: 5 }}
+                      >
                         <div className="text-center">
                           <Loader2
                             size={24}
@@ -721,7 +751,10 @@ export function ImageUploader({
 
                     {/* Done Indicator */}
                     {isDone && (
-                      <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center">
+                      <div
+                        className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center"
+                        style={{ zIndex: 5 }}
+                      >
                         <div
                           className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center"
                           style={{
@@ -745,6 +778,21 @@ export function ImageUploader({
                       </div>
                     )}
                   </div>
+
+                  {/* Remove Button - Moved Outside to prevent clipping */}
+                  <button
+                    type="button"
+                    onClick={() => removeFile(index)}
+                    className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full transition-opacity duration-200 hover:opacity-80"
+                    style={{
+                      backgroundColor: "rgba(255, 0, 0, 0.7)",
+                      backdropFilter: "blur(4px)",
+                      zIndex: 20, // Increased z-index
+                    }}
+                    aria-label={labels.removeImageLabel}
+                  >
+                    <Trash2 size={14} className="text-white" />
+                  </button>
 
                   {/* File Info */}
                   {(showFileName || showFileSize) && (
@@ -788,12 +836,12 @@ export function ImageUploader({
             {uploading ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
-                Uploading...
+                {labels.uploadingButton}
               </>
             ) : (
               <>
                 <Upload size={16} />
-                Upload {images.length}{" "}
+                {labels.uploadButton} {images.length}{" "}
                 {images.length === 1 ? "image" : "images"}
               </>
             )}

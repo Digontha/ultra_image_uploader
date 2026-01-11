@@ -8,7 +8,8 @@ This guide shows you the best ways to use the Ultra Image Uploader package in re
 2. [Common Use Cases](#common-use-cases)
 3. [Best Practices](#best-practices)
 4. [Production Tips](#production-tips)
-5. [Examples](#examples)
+5. [Internationalization](#internationalization)
+6. [Examples](#examples)
 
 ---
 
@@ -454,8 +455,8 @@ function ContextualUploader({ context }: { context: 'light' | 'dark' | 'colored'
 
   const themeMap = {
     light: 'fresh',
-    dark: 'modern',
-    colored: 'sunset'
+    dark: 'dark',
+    colored: 'ocean'
   };
 
   return (
@@ -584,6 +585,241 @@ Use Cloudinary transformations:
 
 ---
 
+## Internationalization
+
+The component supports full internationalization through the `textLabels` prop. You can customize all text labels to match your application's language or create a custom messaging experience.
+
+### Complete Spanish Translation
+
+```tsx
+import { ImageUploader } from "ultra-image-uploader";
+import { useState } from "react";
+
+function SpanishUploader() {
+  const [images, setImages] = useState<File[]>([]);
+
+  const spanishLabels = {
+    uploadAreaText: "Haz clic o arrastra para subir",
+    uploadAreaDragText: "Soltar aquí",
+    uploadButton: "Subir",
+    uploadingButton: "Subiendo...",
+    removeImageLabel: "Eliminar imagen",
+    uploadImagesLabel: "Subir imágenes",
+    dismissErrorLabel: "Descartar",
+    uploadErrorTitle: "Error de Subida",
+    uploadErrorMissingImgBBKey:
+      "Falta la clave API de ImgBB. Proporciona una clave válida.",
+    uploadErrorMissingImgBBKeyEmpty:
+      "La clave API de ImgBB no puede estar vacía.",
+    uploadErrorMissingCloudinaryName:
+      "Falta el nombre de nube de Cloudinary. Proporciona un nombre válido.",
+    uploadErrorMissingCloudinaryNameEmpty:
+      "El nombre de nube de Cloudinary no puede estar vacío.",
+  };
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      textLabels={spanishLabels}
+      multiple
+    />
+  );
+}
+```
+
+### French Translation
+
+```tsx
+function FrenchUploader() {
+  const [images, setImages] = useState<File[]>([]);
+
+  const frenchLabels = {
+    title: "Télécharger des Images",
+    uploadAreaText: "Cliquez ou déposez pour télécharger",
+    uploadAreaDragText: "Déposer ici",
+    uploadButton: "Télécharger",
+    uploadingButton: "Téléchargement...",
+    removeImageLabel: "Supprimer l'image",
+    dismissErrorLabel: "Rejeter",
+    uploadErrorTitle: "Erreur de Téléchargement",
+  };
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      textLabels={frenchLabels}
+    />
+  );
+}
+```
+
+### German Translation
+
+```tsx
+function GermanUploader() {
+  const [images, setImages] = useState<File[]>([]);
+
+  const germanLabels = {
+    title: "Bilder Hochladen",
+    uploadAreaText: "Klicken oder ziehen zum Hochladen",
+    uploadAreaDragText: "Hier ablegen",
+    uploadButton: "Hochladen",
+    uploadingButton: "Wird hochgeladen...",
+    removeImageLabel: "Bild entfernen",
+    dismissErrorLabel: "Verwerfen",
+    uploadErrorTitle: "Upload-Fehler",
+  };
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      textLabels={germanLabels}
+    />
+  );
+}
+```
+
+### Creating a Language Hook
+
+Create a reusable hook for managing translations:
+
+```tsx
+import { useMemo } from "react";
+
+const translations = {
+  en: {
+    title: "Upload Images",
+    uploadAreaText: "Click or drop to upload",
+    uploadAreaDragText: "Drop here",
+    uploadButton: "Upload",
+    uploadingButton: "Uploading...",
+    removeImageLabel: "Remove image",
+    dismissErrorLabel: "Dismiss",
+    uploadErrorTitle: "Upload Error",
+  },
+  es: {
+    title: "Subir Imágenes",
+    uploadAreaText: "Haz clic o arrastra para subir",
+    uploadAreaDragText: "Soltar aquí",
+    uploadButton: "Subir",
+    uploadingButton: "Subiendo...",
+    removeImageLabel: "Eliminar imagen",
+    dismissErrorLabel: "Descartar",
+    uploadErrorTitle: "Error de Subida",
+  },
+  fr: {
+    title: "Télécharger des Images",
+    uploadAreaText: "Cliquez ou déposez pour télécharger",
+    uploadAreaDragText: "Déposer ici",
+    uploadButton: "Télécharger",
+    uploadingButton: "Téléchargement...",
+    removeImageLabel: "Supprimer l'image",
+    dismissErrorLabel: "Rejeter",
+    uploadErrorTitle: "Erreur de Téléchargement",
+  },
+  de: {
+    title: "Bilder Hochladen",
+    uploadAreaText: "Klicken oder ziehen zum Hochladen",
+    uploadAreaDragText: "Hier ablegen",
+    uploadButton: "Hochladen",
+    uploadingButton: "Wird hochgeladen...",
+    removeImageLabel: "Bild entfernen",
+    dismissErrorLabel: "Verwerfen",
+    uploadErrorTitle: "Upload-Fehler",
+  },
+};
+
+type Language = keyof typeof translations;
+
+function useTranslations(language: Language) {
+  return useMemo(() => translations[language], [language]);
+}
+
+// Usage
+function MultilingualUploader({ language }: { language: Language }) {
+  const [images, setImages] = useState<File[]>([]);
+  const textLabels = useTranslations(language);
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      textLabels={textLabels}
+    />
+  );
+}
+```
+
+### Dynamic Language Switching
+
+```tsx
+import { useState } from "react";
+import { ImageUploader } from "ultra-image-uploader";
+
+function LanguageSwitcher() {
+  const [language, setLanguage] = useState<"en" | "es" | "fr">("en");
+  const [images, setImages] = useState<File[]>([]);
+
+  const textLabels = {
+    en: {
+      title: "Upload Images",
+      uploadAreaText: "Click or drop to upload",
+      uploadButton: "Upload",
+      removeImageLabel: "Remove image",
+    },
+    es: {
+      title: "Subir Imágenes",
+      uploadAreaText: "Haz clic o arrastra para subir",
+      uploadButton: "Subir",
+      removeImageLabel: "Eliminar imagen",
+    },
+    fr: {
+      title: "Télécharger des Images",
+      uploadAreaText: "Cliquez ou déposez pour télécharger",
+      uploadButton: "Télécharger",
+      removeImageLabel: "Supprimer l'image",
+    },
+  };
+
+  return (
+    <div>
+      {/* Language selector */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setLanguage("en")}
+          className={`px-3 py-1 rounded ${language === "en" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+        >
+          English
+        </button>
+        <button
+          onClick={() => setLanguage("es")}
+          className={`px-3 py-1 rounded ${language === "es" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+        >
+          Español
+        </button>
+        <button
+          onClick={() => setLanguage("fr")}
+          className={`px-3 py-1 rounded ${language === "fr" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+        >
+          Français
+        </button>
+      </div>
+
+      <ImageUploader
+        images={images}
+        setImages={setImages}
+        textLabels={textLabels[language]}
+      />
+    </div>
+  );
+}
+```
+
+---
+
 ## Examples
 
 ### Complete Example: Multi-Step Form
@@ -695,11 +931,11 @@ function DarkModeUploader() {
 ### All Built-in Themes
 
 ```tsx
-<ImageUploader theme="modern" />  // Purple gradient
-<ImageUploader theme="fresh" />   // Mint/Rose gradient
-<ImageUploader theme="nature" />  // Green gradient
-<ImageUploader theme="ocean" />   // Blue gradient
-<ImageUploader theme="sunset" />  // Orange gradient
+<ImageUploader theme="nature" />  // Green theme
+<ImageUploader theme="modern" />  // Neutral/monochrome theme
+<ImageUploader theme="fresh" />   // Blue theme
+<ImageUploader theme="dark" />    // Dark gradient with blue accent
+<ImageUploader theme="ocean" />   // Blue to purple gradient
 ```
 
 ### Common Props

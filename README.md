@@ -8,7 +8,7 @@ A modern, production-ready React image upload component with shadcn/ui-inspired 
 ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
 
-**shadcn/ui Design** • **3 Themes** • **ImgBB & Cloudinary** • **Customizable**
+**shadcn/ui Design** • **5 Themes** • **ImgBB & Cloudinary** • **Customizable**
 
 </div>
 
@@ -22,13 +22,15 @@ A modern, production-ready React image upload component with shadcn/ui-inspired 
 - **Live Previews** - Responsive grid with image thumbnails
 - **Progress Tracking** - Real-time upload progress with visual feedback
 - **Remove Images** - Easy removal with trash icon in both create and update modes
-- **Error Handling** - Built-in API key validation and error display
+- **Error Handling** - Built-in API key validation and error display with dismissible alerts
 - **Custom Themes** - Create your own theme with custom colors
 - **Multiple Providers** - ImgBB & Cloudinary support
 - **File Validation** - Size, type, and count validation
 - **Accessible** - Keyboard navigation and ARIA support
 - **Auto Import** - Works with VS Code, WebStorm, and all editors
 - **Customization API** - Border radius, preview size (xs to 2xl), show/hide elements
+- **Custom Text Labels** - Fully customizable text labels for internationalization
+- **Custom Upload Button** - Use your own button component with optional drag-and-drop area
 
 ## Installation
 
@@ -66,6 +68,8 @@ function App() {
 | **Core**                |
 | `images`                | `File[]`                                               | **Required**                | Selected image files            |
 | `setImages`             | `(files: File[]) => void`                              | **Required**                | Update images state             |
+| **Text Labels**         |
+| `textLabels`            | `ImageUploaderTextLabels`                              | `undefined`                 | Custom text labels (i18n)       |
 | **Mode**                |
 | `mode`                  | `'add' \| 'update'`                                    | `'add'`                     | Upload mode                     |
 | `defaultImages`         | `string[]`                                             | `[]`                        | Default images (update mode)    |
@@ -96,9 +100,117 @@ function App() {
 | `hideDefaultUploadArea` | `boolean`                                              | `false`                     | Hide default upload area        |
 | `onUploadClick`         | `() => void`                                           | `undefined`                 | Callback when upload is clicked |
 
+## Text Labels Interface
+
+The `textLabels` prop allows you to customize all text labels in the component for internationalization or custom messaging:
+
+```tsx
+interface ImageUploaderTextLabels {
+
+  // Upload area text
+  uploadAreaText?: string;
+  uploadAreaDragText?: string;
+
+  // Button text
+  uploadButton?: string;
+  uploadingButton?: string;
+
+  // Image count
+  imageCountLabel?: string;
+
+  // Accessibility
+  removeImageLabel?: string;
+  uploadImagesLabel?: string;
+  dismissErrorLabel?: string;
+
+  // Error messages
+  uploadErrorTitle?: string;
+  uploadErrorMissingImgBBKey?: string;
+  uploadErrorMissingImgBBKeyEmpty?: string;
+  uploadErrorMissingCloudinaryName?: string;
+  uploadErrorMissingCloudinaryNameEmpty?: string;
+}
+```
+
 ## Examples
 
 ### Basic Usage
+
+```tsx
+import { ImageUploader } from "ultra-image-uploader";
+import { useState } from "react";
+
+function App() {
+  const [images, setImages] = useState<File[]>([]);
+
+  return <ImageUploader images={images} setImages={setImages} multiple />;
+}
+```
+
+### Custom Text Labels (Internationalization)
+
+Customize all text labels for internationalization or custom messaging:
+
+```tsx
+import { ImageUploader } from "ultra-image-uploader";
+
+function SpanishExample() {
+  const [images, setImages] = useState<File[]>([]);
+
+  const textLabels = {
+    title: "Subir Imágenes",
+    uploadAreaText: "Haz clic o arrastra para subir",
+    uploadAreaDragText: "Soltar aquí",
+    uploadButton: "Subir",
+    uploadingButton: "Subiendo...",
+    removeImageLabel: "Eliminar imagen",
+    dismissErrorLabel: "Descartar",
+    uploadErrorTitle: "Error de Subida",
+    uploadErrorMissingImgBBKey:
+      "Falta la clave API de ImgBB. Proporciona una clave válida.",
+    uploadErrorMissingImgBBKeyEmpty: "La clave API de ImgBB no puede estar vacía.",
+    uploadErrorMissingCloudinaryName:
+      "Falta el nombre de nube de Cloudinary. Proporciona un nombre válido.",
+    uploadErrorMissingCloudinaryNameEmpty:
+      "El nombre de nube de Cloudinary no puede estar vacío.",
+  };
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      textLabels={textLabels}
+      multiple
+    />
+  );
+}
+```
+
+### Partial Custom Labels
+
+You only need to override the labels you want to change:
+
+```tsx
+function PartialCustomLabelExample() {
+  const [images, setImages] = useState<File[]>([]);
+
+  const textLabels = {
+    uploadButton: "Upload Photos",
+    uploadingButton: "Uploading your photos...",
+    uploadAreaText: "Click here or drop images",
+  };
+
+  return (
+    <ImageUploader
+      images={images}
+      setImages={setImages}
+      textLabels={textLabels}
+    />
+  );
+}
+```
+
+### Different Themes
 
 ```tsx
 import { ImageUploader } from "ultra-image-uploader";
